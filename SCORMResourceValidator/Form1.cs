@@ -497,10 +497,10 @@ namespace SCORMResourceValidator
             System.IO.File.WriteAllText(strLogDir + @"\manifest_files_missing.html", logHTMLTemplate);
 
             //Generate Metadata logs - take out for now until can recreate the whole Metadata parse
-            /* logHTMLTemplate = createMetadataDocTemplate("METADATA FILE REPORT");
+             logHTMLTemplate = createMetadataDocTemplate("METADATA FILE REPORT");
              System.IO.Directory.CreateDirectory(strLogDir);
              System.IO.File.WriteAllText(strLogDir + @"\metadata_file_report.doc", logHTMLTemplate);
-             */
+             
 
             //Generate checksum
             string sdf = "";
