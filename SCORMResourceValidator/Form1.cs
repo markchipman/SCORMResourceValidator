@@ -13,6 +13,8 @@ using System.IO;
 using System.Windows.Forms;
 using System.Net;
 using System.Security.Cryptography;
+using System.Xml.Schema;
+using System.Xml.XPath;
 
 namespace SCORMResourceValidator
 {
@@ -27,12 +29,17 @@ namespace SCORMResourceValidator
         private int numContentAgMetadatafiles = 0;
         private int numSCOmetadatafiles = 0;
         private int numAssetmetadatafiles = 0;
+        private IEnumerable<XElement> ContentAgmetafiles;
+        private IEnumerable<XElement> SCOmetafiles;
+        private IEnumerable<XElement> Assetmetafiles;
         private List<string> validXMLfiles = new List<string>();
         private List<string> invalidXMLfiles = new List<string>();
         private List<string> metadataXMLfiles = new List<string>();
         private int numvalidmetadatafiles = 0;
         private int numinvalidmetadatafiles = 0;
         private int nummissingmetadatafiles = 0;
+        private string metadatafiles_errors = "";
+        private List<string> metadatafilesErrors;
 
         public Form1()
         {
@@ -46,7 +53,6 @@ namespace SCORMResourceValidator
                 "adlseq_v1p3.xsd",
                 "anyElement.xsd",
                 "custom.xsd",
-                "datatypes.dtd",
                 "dataTypes.xsd",
                 "elementNames.xsd",
                 "elementTypes.xsd",
@@ -76,6 +82,7 @@ namespace SCORMResourceValidator
                 "vocabTypes.xsd",
                 "vocabValues.xsd",
                 "xml.xsd",
+                "datatypes.dtd",
                 "XMLSchema.dtd"
                };
 
@@ -83,12 +90,12 @@ namespace SCORMResourceValidator
             logFilelist.Add("manifest_files_missing.html");
             logFilelist.Add("packaged_files_found.html");
             logFilelist.Add("packaged_files_missing.html");
-            //logFilelist.Add("metadata_file_report.doc");
+            logFilelist.Add("metadata_file_report.doc");
             logFilelist.Add("PIF_file_validate.txt");
 
 
             fileWhitelist.AddRange(SCORMSchemas);
-
+           
             grpPIFFilesFound.Text = "Files found in PIF";
             grpManifestFilesFound.Text = "Resources found in Manifest";
             grpPIFFilesMissing.Text = "Files found in Manifest and not found in PIF";
@@ -251,6 +258,10 @@ namespace SCORMResourceValidator
             List<string> manifestFiles = new List<string>();
             ZipArchive archive;
             XDocument manifest;
+            XDocument tempXml;
+            // XmlSchemaSet schemas = new XmlSchemaSet();
+            // XmlSchema tempschema;
+
 
             try
             {
@@ -288,8 +299,14 @@ namespace SCORMResourceValidator
                         listPIFFilesFound.Items.Add(entryFilename);
                     }
 
-                    if (entryFilename == "imsmanifest.xml")
+                    if (!entryFilename.Substring(entryFilename.Length - 3).Equals("dtd") && isSCORMSchemaFile(entryFilename))
                     {
+                       // tempschema = XmlSchema.Read(entry.Open(),null);
+                       // schemas.Add(tempschema);
+                    }
+
+                    if (entryFilename == "imsmanifest.xml")
+                    { 
                         try
                         {
                             manifest = XDocument.Load(entry.Open());
@@ -305,9 +322,10 @@ namespace SCORMResourceValidator
                         XNamespace mdns = "http://www.adlnet.org/xsd/adlcp_v1p3";
 
                         // This creates the lists and counts of all the files listed in the Manifest
+                        // TODO: Also figures out what it's metadata type is
                         var mdFiles = manifest.Root.Descendants(ns + "metadata").Descendants(mdns + "location");
                         var files = manifest.Root.Descendants(ns + "file");
-
+                       
                         foreach (var file in files)
                         {
                             String filename = WebUtility.UrlDecode(file.Attribute("href").Value);
@@ -326,20 +344,12 @@ namespace SCORMResourceValidator
                             {
                                 manifestFiles.Add(mdFilename);
                                 listManifestFilesFound.Items.Add(mdFilename);
-                                intManifestFilesFoundCount++;
+                                intManifestFilesFoundCount++;                                
                             }
                         }
 
                         // This gets the counts of the metadata files
-                 
-                       var ContentAgmetafiles = manifest.Root.Descendants(mdns + "metadata");
-                     /*    foreach (var ContentAgmetafile in ContentAgmetafiles)
-                        {
-                            numContentAgMetadatafiles++;
-                            numMetadatafiles++;
-                        }
-                     */
-
+                        
                         ContentAgmetafiles = manifest.Root.Descendants(ns + "organizations").Descendants(ns + "metadata").Descendants(mdns + "location");
                         foreach (var ContentAgmetafile in ContentAgmetafiles)
                         {
@@ -348,7 +358,7 @@ namespace SCORMResourceValidator
                             metadataXMLfiles.Add(ContentAgmetafile.Value.ToString());
                         }
 
-                        var SCOmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "sco").Descendants(mdns + "location");
+                        SCOmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "sco").Descendants(mdns + "location");
                         foreach (var SCOfile in SCOmetafiles)
                         {
                             numSCOmetadatafiles++;
@@ -356,15 +366,15 @@ namespace SCORMResourceValidator
                             metadataXMLfiles.Add(SCOfile.Value.ToString());
                         }
 
-                        var Assetmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "asset").Descendants(mdns + "location");
+                        Assetmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "asset").Descendants(mdns + "location");
                         foreach (var Assetfile in Assetmetafiles)
                         {
                             numAssetmetadatafiles++;
                             numMetadatafiles++;
                             metadataXMLfiles.Add(Assetfile.Value.ToString());
+                            
                         }
-
-
+                        
                         // Set styles
                         lblStatus.BorderStyle = BorderStyle.FixedSingle;
                         lblStatus.Text = "Success! Saved logs for " + strPIFFilename + ".";
@@ -373,12 +383,28 @@ namespace SCORMResourceValidator
                     } // end imsmanifest if
                     else if (entryFilename.Contains(".xml"))
                     {
+                       // tempXml = XDocument.Load(entry.Open());
+
+                        /*
                         if (isValidXML(entry)) validXMLfiles.Add(entryFilename);
                         else invalidXMLfiles.Add(entryFilename);
+                        */
+
                     }
 
 
                 } // end foreach for ZipArchive
+                
+                foreach (var c in ContentAgmetafiles)
+                {
+                    string thename = c.Value.ToString();
+                    ZipArchiveEntry entry = archive.GetEntry(thename);
+                    MetadataFile contentmetadatafile = new MetadataFile(XDocument.Load(entry.Open()), thename, "content aggregation");
+                    if (!contentmetadatafile.isValid())
+                    {
+                        metadatafilesErrors.Add(contentmetadatafile.getErrors());
+                    }
+                }
 
                 // Compare PIF and manifest lists to generate the lists of missing files
                 var pifFilesMissing = manifestFiles.Where(mFile => !pifFiles.Contains(mFile)); // these are files listed in the manifest but not found in the PIF
@@ -575,8 +601,15 @@ namespace SCORMResourceValidator
             logTemplate = logTemplate + "------------------------------------ \r\n \r\n";
 
             // TODO: add list of INVALID metadata files
+            logTemplate = logTemplate + metadatafiles_errors;
 
-            return logTemplate;
+            logTemplate = logTemplate + " \r\n------------meta-------------------- \r\n \r\n";
+
+            logTemplate = logTemplate + metadatafilesErrors + "\r\n";
+
+            
+
+                return logTemplate;
         }
 
         /// <summary>
@@ -723,15 +756,6 @@ namespace SCORMResourceValidator
         /// <param name="e"></param>
         private void linkViewLogs_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            openLastLogDir();
-        }
-
-        /// <summary>
-        /// function that opens the last created log folder
-        /// path stored in strLogDir variable
-        /// </summary>
-        private void openLastLogDir()
-        {
             System.Diagnostics.Process.Start(strLogDir);
         }
 
@@ -743,15 +767,30 @@ namespace SCORMResourceValidator
         /// <returns>bool</returns>
         private Boolean isValidXML(ZipArchiveEntry xmlentry)
         {
-            try
-            {
-                XDocument m = XDocument.Load(xmlentry.Open());
-            }
-            catch 
-            {
-               return false;
-            }
+             try
+             {
+                 XDocument m = XDocument.Load(xmlentry.Open());
+                MetadataValidate metadataValidate = new MetadataValidate();
+                metadataValidate.Check(xmlentry.Open());
+                m.Validate(metadataValidate.getSchemaSets(), (o, e) =>
+                {
+                    metadatafiles_errors = metadatafiles_errors + e.Message;
+                });
+             }
+             catch 
+             {
+                return false;
+             } 
+             
+            
+            /*
 
+            if (metadataValidate.geterrors() != "")
+            {
+                metadatafiles_errors = metadatafiles_errors + metadataValidate.geterrors();
+                return false;
+            }
+            */
             return true;
         }
 

@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace SCORMResourceValidator
 {
-    class MetadataValidator
+    class MetadataFileValidator
     {
-
     }
 }

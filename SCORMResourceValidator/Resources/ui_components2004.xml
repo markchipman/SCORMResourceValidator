@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetadataEditorConfiguration>
+	<sco>
+		<general name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" requiredValue="ATIA" showTag="true" />
+				<entry name="" minOccurs="1" maxOccurs="1"
+					type="string:1000" requiredValue="TBD" showTag="true" />
+			</identifier>
+			<title name="" minOccurs="1" maxOccurs="1"
+				type="langstring:1000" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="10"
+				type="string:100" showTag="false" />
+			<description name="" minOccurs="1" maxOccurs="10"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="10"
+				type="langstring:1000" showTag="true" />
+			<coverage name="" minOccurs="0" maxOccurs="10"
+				type="langstring:1000" showTag="false" />
+			<structure name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary"
+				vocab="collection, linear, hierarchical, networked, atomic"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<aggregationlevel name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="1, 2, 3, 4" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+		</general>
+		<lifeCycle name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<version name="" minOccurs="1" maxOccurs="1"
+				type="langstring:50" showTag="true" />
+			<status name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary" vocab="draft, final, revised, unavailable"
+				source="LOMv1.0" isSelectable="true" requiredValue="final"
+				showTag="true" />
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="0" maxOccurs="1"
+					type="vocabulary"
+					vocab="author, publisher, unknown, initiator, terminator, validator, editor, graphical designer, technical implementer, content provider, technical validator, educational validator, script writer, instructional designer, subject matter expert"
+					source="LOMv1.0" isSelectable="true" requiredValue="publisher"
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="false" />
+				<date name="" minOccurs="0" maxOccurs="1"
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="false" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+		</lifeCycle>
+		<metaMetadata name="" minOccurs="1" maxOccurs="1"
+			type="container" showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+				<entry name="" minOccurs="1" maxOccurs=""
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+			</identifier>
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="1" maxOccurs="1"
+					type="vocabulary"
+					vocab="creator, validator"
+					source="LOMv1.0" isSelectable="true" requiredValue=""
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="true" />
+				<date name="" minOccurs="0" maxOccurs=""
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="true" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+			<metadataSchema name="" minOccurs="3" maxOccurs="10" type="string:30" requiredValue="LOMv1.0 -AND- SCORM_CAM_v1.3 -AND- ADLv1.0" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="1"
+				type="string:100" showTag="false" />
+		</metaMetadata>
+		<technical name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<format name="" minOccurs="1" maxOccurs="40"
+				type="string:500" showTag="true" />
+			<size name="" minOccurs="0" maxOccurs="1" type="string:30"
+				showTag="false" />
+			<location name="" minOccurs="0" maxOccurs="10"
+				type="string:1000" showTag="false" />
+			<requirement name="" minOccurs="0" maxOccurs="40"
+				type="container" showTag="false">
+				<orComposite name="" minOccurs="0" maxOccurs="40"
+					type="container" showTag="true">
+					<type name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary" vocab="operating system, browser"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<name name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary"
+						vocab="pc-dos, ms-windows, macos, unix, multi-os, none, any, netscape communicator, ms internet explorer, opera, amaya"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<minimumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+					<maximumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+				</orComposite>
+			</requirement>
+			<installationRemarks name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<otherPlatformRequirements name="" minOccurs="0"
+				maxOccurs="1" type="langstring:1000" showTag="false" />
+			<duration name="" minOccurs="0" maxOccurs="1"
+				type="container" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</duration>
+		</technical>
+		<educational name="" minOccurs="0" maxOccurs="1"
+			type="container" showTag="false">
+			<interactivityType minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="active, expositive, mixed" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<learningResourceType minOccurs="0" maxOccurs=""
+				type="vocabulary"
+				vocab="exercise, simulation, questionnaire, diagram, figure, graph, index, slide, table, narrative text, exam, experiment, problem statement, self assesment, lecture"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<interactivityLevel minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<semanticDensity minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<intendedEndUserRole minOccurs="0" maxOccurs=""
+				type="vocabulary" vocab="teacher, author, learner, manager"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<context minOccurs="0" maxOccurs="" type="vocabulary"
+				vocab="school, higher education, training, other" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<typicalAgeRange minOccurs="0" maxOccurs=""
+				type="langstring:1000" showTag="false" />
+			<difficulty minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="very easy, easy, medium, difficult, very difficult"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<typicalLearningTime name="" minOccurs="0" maxOccurs="1"
+				type="date" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="false" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</typicalLearningTime>
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<language name="" minOccurs="0" maxOccurs=""
+				type="string:1000" showTag="false" />
+		</educational>
+		<rights name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<cost name="" minOccurs="1" maxOccurs="1" type="vocabulary"
+				vocab="yes, no" source="LOMv1.0" isSelectable="true"
+				requiredValue="no" showTag="true" />
+			<copyrightAndOtherRestrictions name="" minOccurs="1"
+				maxOccurs="1" type="vocabulary" vocab="yes, no" source="LOMv1.0"
+				isSelectable="true" requiredValue="no" showTag="true" />
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+		</rights>
+		<relation name="" minOccurs="0" maxOccurs="100" type="container"
+			showTag="false">
+			<kind name="" minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="ispartof, haspart, isversionof, hasversion, isformatof, hasformat, references, isreferencedby, isbasedon, isbasisfor, requires, isrequiredby"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<resource name="" minOccurs="0" maxOccurs="100"
+				type="container" showTag="false">
+				<identifier name="" minOccurs="0" maxOccurs="10"
+					type="container" showTag="false">
+					<catalog name="" minOccurs="0" maxOccurs="1"
+						type="string:1000" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:1000" showTag="false" />
+				</identifier>
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</resource>
+		</relation>
+		<annotation name="" minOccurs="0" maxOccurs="30" type="container"
+			showTag="false">
+			<entity name="" minOccurs="0" maxOccurs="1" type="string:1000"
+				showTag="false"/>
+			<date name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<dateTime name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</date>
+		</annotation>
+		<classification name="" minOccurs="5" maxOccurs="40"
+			type="container" showTag="true">
+			<purpose name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary"
+				vocab="discipline, idea, prerequisite, educational objective, accessibility restrictions, educational level, skill level, security level, competency"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="true" />
+			<taxonpath name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<source name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+				<taxon name="" minOccurs="0" maxOccurs="15"
+					type="container" showTag="false">
+					<id name="" minOccurs="0" maxOccurs="1"
+						type="string:100" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:500" showTag="false" />
+				</taxon>
+			</taxonpath>
+			<description name="" minOccurs="1" maxOccurs="1"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="40"
+				type="langstring:1000" showTag="true" />
+		</classification>
+	</sco>
+	<ca>
+		<general name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" requiredValue="ATIA" showTag="true" />
+				<entry name="" minOccurs="1" maxOccurs="1"
+					type="string:1000" requiredValue="TBD" showTag="true" />
+			</identifier>
+			<title name="" minOccurs="1" maxOccurs="1"
+				type="langstring:1000" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="10"
+				type="string:100" showTag="false" />
+			<description name="" minOccurs="1" maxOccurs="10"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="10"
+				type="langstring:1000" showTag="true" />
+			<coverage name="" minOccurs="0" maxOccurs="10"
+				type="langstring:1000" showTag="false" />
+			<structure name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary"
+				vocab="collection, linear, hierarchical, networked, atomic"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<aggregationlevel name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="1, 2, 3, 4" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+		</general>
+		<lifeCycle name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<version name="" minOccurs="1" maxOccurs="1"
+				type="langstring:50" showTag="true" />
+			<status name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary" vocab="draft, final, revised, unavailable"
+				source="LOMv1.0" isSelectable="true" requiredValue="final"
+				showTag="true" />
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="0" maxOccurs="1"
+					type="vocabulary"
+					vocab="author, publisher, unknown, initiator, terminator, validator, editor, graphical designer, technical implementer, content provider, technical validator, educational validator, script writer, instructional designer, subject matter expert"
+					source="LOMv1.0" isSelectable="true" requiredValue="publisher"
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="false" />
+				<date name="" minOccurs="0" maxOccurs="1"
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="false" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+		</lifeCycle>
+		<metaMetadata name="" minOccurs="1" maxOccurs="1"
+			type="container" showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+				<entry name="" minOccurs="1" maxOccurs=""
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+			</identifier>
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="1" maxOccurs="1"
+					type="vocabulary"
+					vocab="creator, validator"
+					source="LOMv1.0" isSelectable="true" requiredValue=""
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="true" />
+				<date name="" minOccurs="0" maxOccurs=""
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="true" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+			<metadataSchema name="" minOccurs="3" maxOccurs="10" type="string:30" requiredValue="LOMv1.0 -AND- SCORM_CAM_v1.3 -AND- ADLv1.0" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="1"
+				type="string:100" showTag="false" />
+		</metaMetadata>
+		<technical name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<format name="" minOccurs="1" maxOccurs="40"
+				type="string:500" showTag="true" />
+			<size name="" minOccurs="0" maxOccurs="1" type="string:30"
+				showTag="false" />
+			<location name="" minOccurs="0" maxOccurs="10"
+				type="string:1000" showTag="false" />
+			<requirement name="" minOccurs="0" maxOccurs="40"
+				type="container" showTag="false">
+				<orComposite name="" minOccurs="0" maxOccurs="40"
+					type="container" showTag="true">
+					<type name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary" vocab="operating system, browser"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<name name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary"
+						vocab="pc-dos, ms-windows, macos, unix, multi-os, none, any, netscape communicator, ms internet explorer, opera, amaya"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<minimumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+					<maximumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+				</orComposite>
+			</requirement>
+			<installationRemarks name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<otherPlatformRequirements name="" minOccurs="0"
+				maxOccurs="1" type="langstring:1000" showTag="false" />
+			<duration name="" minOccurs="0" maxOccurs="1"
+				type="container" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</duration>
+		</technical>
+		<educational name="" minOccurs="0" maxOccurs="1"
+			type="container" showTag="false">
+			<interactivityType minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="active, expositive, mixed" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<learningResourceType minOccurs="0" maxOccurs=""
+				type="vocabulary"
+				vocab="exercise, simulation, questionnaire, diagram, figure, graph, index, slide, table, narrative text, exam, experiment, problem statement, self assesment, lecture"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<interactivityLevel minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<semanticDensity minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<intendedEndUserRole minOccurs="0" maxOccurs=""
+				type="vocabulary" vocab="teacher, author, learner, manager"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<context minOccurs="0" maxOccurs="" type="vocabulary"
+				vocab="school, higher education, training, other" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<typicalAgeRange minOccurs="0" maxOccurs=""
+				type="langstring:1000" showTag="false" />
+			<difficulty minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="very easy, easy, medium, difficult, very difficult"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<typicalLearningTime name="" minOccurs="0" maxOccurs="1"
+				type="date" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="false" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</typicalLearningTime>
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<language name="" minOccurs="0" maxOccurs=""
+				type="string:1000" showTag="false" />
+		</educational>
+		<rights name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<cost name="" minOccurs="1" maxOccurs="1" type="vocabulary"
+				vocab="yes, no" source="LOMv1.0" isSelectable="true"
+				requiredValue="no" showTag="true" />
+			<copyrightAndOtherRestrictions name="" minOccurs="1"
+				maxOccurs="1" type="vocabulary" vocab="yes, no" source="LOMv1.0"
+				isSelectable="true" requiredValue="no" showTag="true" />
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+		</rights>
+		<relation name="" minOccurs="0" maxOccurs="100" type="container"
+			showTag="false">
+			<kind name="" minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="ispartof, haspart, isversionof, hasversion, isformatof, hasformat, references, isreferencedby, isbasedon, isbasisfor, requires, isrequiredby"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<resource name="" minOccurs="0" maxOccurs="100"
+				type="container" showTag="false">
+				<identifier name="" minOccurs="0" maxOccurs="10"
+					type="container" showTag="false">
+					<catalog name="" minOccurs="0" maxOccurs="1"
+						type="string:1000" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:1000" showTag="false" />
+				</identifier>
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</resource>
+		</relation>
+		<annotation name="" minOccurs="0" maxOccurs="30" type="container"
+			showTag="false">
+			<entity name="" minOccurs="0" maxOccurs="1" type="string:1000"
+				showTag="false"/>
+			<date name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<dateTime name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</date>
+		</annotation>
+		<classification name="" minOccurs="7" maxOccurs="40"
+			type="container" showTag="true">
+			<purpose name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary"
+				vocab="discipline, idea, prerequisite, educational objective, accessibility restrictions, educational level, skill level, security level, competency"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="true" />
+			<taxonpath name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<source name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+				<taxon name="" minOccurs="0" maxOccurs="15"
+					type="container" showTag="false">
+					<id name="" minOccurs="0" maxOccurs="1"
+						type="string:100" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:500" showTag="false" />
+				</taxon>
+			</taxonpath>
+			<description name="" minOccurs="1" maxOccurs="1"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="40"
+				type="langstring:1000" showTag="true" />
+		</classification>
+	</ca>
+	<asset>
+		<general name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" requiredValue="ATIA" showTag="true" />
+				<entry name="" minOccurs="1" maxOccurs="1"
+					type="string:1000" requiredValue="TBD" showTag="true" />
+			</identifier>
+			<title name="" minOccurs="1" maxOccurs="1"
+				type="langstring:1000" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="10"
+				type="string:100" showTag="false" />
+			<description name="" minOccurs="1" maxOccurs="10"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="10"
+				type="langstring:1000" showTag="true" />
+			<coverage name="" minOccurs="0" maxOccurs="10"
+				type="langstring:1000" showTag="false" />
+			<structure name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary"
+				vocab="collection, linear, hierarchical, networked, atomic"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<aggregationlevel name="" minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="1, 2, 3, 4" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+		</general>
+		<lifeCycle name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<version name="" minOccurs="1" maxOccurs="1"
+				type="langstring:50" showTag="true" />
+			<status name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary" vocab="draft, final, revised, unavailable"
+				source="LOMv1.0" isSelectable="true" requiredValue="final"
+				showTag="true" />
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="0" maxOccurs="1"
+					type="vocabulary"
+					vocab="author, publisher, unknown, initiator, terminator, validator, editor, graphical designer, technical implementer, content provider, technical validator, educational validator, script writer, instructional designer, subject matter expert"
+					source="LOMv1.0" isSelectable="true" requiredValue="publisher"
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="false" />
+				<date name="" minOccurs="0" maxOccurs="1"
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="false" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+		</lifeCycle>
+		<metaMetadata name="" minOccurs="1" maxOccurs="1"
+			type="container" showTag="true">
+			<identifier name="" minOccurs="1" maxOccurs="10"
+				type="container" showTag="true">
+				<catalog name="" minOccurs="0" maxOccurs="1"
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+				<entry name="" minOccurs="1" maxOccurs=""
+					type="string:1000" showTag="true" requiredValue="TBD"/>
+			</identifier>
+			<contribute name="" minOccurs="0" maxOccurs="30"
+				type="container" showTag="false">
+				<role name="" minOccurs="1" maxOccurs="1"
+					type="vocabulary"
+					vocab="creator, validator"
+					source="LOMv1.0" isSelectable="true" requiredValue=""
+					showTag="false" />
+				<entity name="" minOccurs="1" maxOccurs="40"
+					type="string:1000" showTag="true" />
+				<date name="" minOccurs="0" maxOccurs=""
+					type="container" showTag="true">
+					<dateTime name="" minOccurs="1" maxOccurs="1"
+						type="string:10" showTag="true" />
+					<description name="" minOccurs="0" maxOccurs="1"
+						type="langstring:1000" showTag="false" />
+				</date>
+			</contribute>
+			<metadataSchema name="" minOccurs="3" maxOccurs="10" type="string:30" requiredValue="LOMv1.0 -AND- SCORM_CAM_v1.3 -AND- ADLv1.0" showTag="true" />
+			<language name="" minOccurs="0" maxOccurs="1"
+				type="string:100" showTag="false" />
+		</metaMetadata>
+		<technical name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<format name="" minOccurs="1" maxOccurs="40"
+				type="string:500" showTag="true" />
+			<size name="" minOccurs="0" maxOccurs="1" type="string:30"
+				showTag="false" />
+			<location name="" minOccurs="0" maxOccurs="10"
+				type="string:1000" showTag="false" />
+			<requirement name="" minOccurs="0" maxOccurs="40"
+				type="container" showTag="false">
+				<orComposite name="" minOccurs="0" maxOccurs="40"
+					type="container" showTag="true">
+					<type name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary" vocab="operating system, browser"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<name name="" minOccurs="0" maxOccurs="1"
+						type="vocabulary"
+						vocab="pc-dos, ms-windows, macos, unix, multi-os, none, any, netscape communicator, ms internet explorer, opera, amaya"
+						source="LOMv1.0" isSelectable="true" requiredValue=""
+						showTag="false" />
+					<minimumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+					<maximumversion name="" minOccurs="0" maxOccurs="1"
+						type="string:30" showTag="false" />
+				</orComposite>
+			</requirement>
+			<installationRemarks name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<otherPlatformRequirements name="" minOccurs="0"
+				maxOccurs="1" type="langstring:1000" showTag="false" />
+			<duration name="" minOccurs="0" maxOccurs="1"
+				type="container" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</duration>
+		</technical>
+		<educational name="" minOccurs="0" maxOccurs="1"
+			type="container" showTag="false">
+			<interactivityType minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="active, expositive, mixed" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<learningResourceType minOccurs="0" maxOccurs=""
+				type="vocabulary"
+				vocab="exercise, simulation, questionnaire, diagram, figure, graph, index, slide, table, narrative text, exam, experiment, problem statement, self assesment, lecture"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<interactivityLevel minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<semanticDensity minOccurs="0" maxOccurs="1"
+				type="vocabulary" vocab="very low, low, medium, high, very high"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<intendedEndUserRole minOccurs="0" maxOccurs=""
+				type="vocabulary" vocab="teacher, author, learner, manager"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<context minOccurs="0" maxOccurs="" type="vocabulary"
+				vocab="school, higher education, training, other" source="LOMv1.0"
+				isSelectable="true" requiredValue="" showTag="false" />
+			<typicalAgeRange minOccurs="0" maxOccurs=""
+				type="langstring:1000" showTag="false" />
+			<difficulty minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="very easy, easy, medium, difficult, very difficult"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<typicalLearningTime name="" minOccurs="0" maxOccurs="1"
+				type="date" showTag="false">
+				<duration name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="false" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</typicalLearningTime>
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+			<language name="" minOccurs="0" maxOccurs=""
+				type="string:1000" showTag="false" />
+		</educational>
+		<rights name="" minOccurs="1" maxOccurs="1" type="container"
+			showTag="true">
+			<cost name="" minOccurs="1" maxOccurs="1" type="vocabulary"
+				vocab="yes, no" source="LOMv1.0" isSelectable="true"
+				requiredValue="no" showTag="true" />
+			<copyrightAndOtherRestrictions name="" minOccurs="1"
+				maxOccurs="1" type="vocabulary" vocab="yes, no" source="LOMv1.0"
+				isSelectable="true" requiredValue="no" showTag="true" />
+			<description name="" minOccurs="0" maxOccurs="1"
+				type="langstring:1000" showTag="false" />
+		</rights>
+		<relation name="" minOccurs="0" maxOccurs="100" type="container"
+			showTag="false">
+			<kind name="" minOccurs="0" maxOccurs="1" type="vocabulary"
+				vocab="ispartof, haspart, isversionof, hasversion, isformatof, hasformat, references, isreferencedby, isbasedon, isbasisfor, requires, isrequiredby"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="false" />
+			<resource name="" minOccurs="0" maxOccurs="100"
+				type="container" showTag="false">
+				<identifier name="" minOccurs="0" maxOccurs="10"
+					type="container" showTag="false">
+					<catalog name="" minOccurs="0" maxOccurs="1"
+						type="string:1000" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:1000" showTag="false" />
+				</identifier>
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</resource>
+		</relation>
+		<annotation name="" minOccurs="0" maxOccurs="30" type="container"
+			showTag="false">
+			<entity name="" minOccurs="0" maxOccurs="1" type="string:1000"
+				showTag="false"/>
+			<date name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<dateTime name="" minOccurs="0" maxOccurs="1"
+					type="string:200" showTag="true" />
+				<description name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+			</date>
+		</annotation>
+		<classification name="" minOccurs="7" maxOccurs="40"
+			type="container" showTag="true">
+			<purpose name="" minOccurs="1" maxOccurs="1"
+				type="vocabulary"
+				vocab="discipline, idea, prerequisite, educational objective, accessibility restrictions, educational level, skill level, security level, competency"
+				source="LOMv1.0" isSelectable="true" requiredValue=""
+				showTag="true" />
+			<taxonpath name="" minOccurs="0" maxOccurs=""
+				type="container" showTag="false">
+				<source name="" minOccurs="0" maxOccurs="1"
+					type="langstring:1000" showTag="false" />
+				<taxon name="" minOccurs="0" maxOccurs="15"
+					type="container" showTag="false">
+					<id name="" minOccurs="0" maxOccurs="1"
+						type="string:100" showTag="false" />
+					<entry name="" minOccurs="0" maxOccurs=""
+						type="string:500" showTag="false" />
+				</taxon>
+			</taxonpath>
+			<description name="" minOccurs="1" maxOccurs="1"
+				type="langstring:2000" showTag="true" />
+			<keyword name="" minOccurs="1" maxOccurs="40"
+				type="langstring:1000" showTag="true" />
+		</classification>
+	</asset>
+</MetadataEditorConfiguration>
