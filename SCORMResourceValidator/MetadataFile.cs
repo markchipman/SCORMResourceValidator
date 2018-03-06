@@ -16,29 +16,23 @@ namespace SCORMResourceValidator
         private String metadataFileName = "";
         private String metadataType = "";
         private Boolean metadataFileExists = false;
-        private XDocument metadataFileXmlObj = null;
+        private XmlDocument metadataFileXmlObj = null;
         private int numErrors = 0;
-        private string ErrList;
+       // private string ErrList;
+        private List<string> ErrList = new List<string>();
+        private Boolean isvalid = true;
+        private int tagFound = 0;
 
-        public MetadataFile(XDocument md, string mdfilename, string mdtype)
+        public MetadataFile(XmlDocument md, string mdfilename, string mdtype)
         {
             metadataFileName = mdfilename;
             metadataType = mdtype;
             metadataFileXmlObj = md;
         }
 
-        private void Validate()
-        {
-            XDocument m = metadataFileXmlObj;
-
-          
-
-
-        }
-
         public Boolean isValid()
         {
-            return true;
+            return isvalid;
         }
 
         public Boolean Exists()
@@ -49,67 +43,55 @@ namespace SCORMResourceValidator
         //Main Validate
         private Boolean Validate(XmlNode s)
         {
+            Boolean state = true;
             // walk the DOM tree and validate...
             for (XmlNode sNode = s.FirstChild; sNode != null; sNode = sNode.NextSibling)
             {
-                schemaElement inSe = new schemaElement(sNode);
-                if (inSe.type.equals(CONTAINER_TYPE) && inSe.showTag())
+                SchemaElement inSe = new SchemaElement(sNode);
+                if (inSe.type.Equals("container") && inSe.ShowTag())
                 {
-                    debug.print(metadataEditor.DEBUG, "	Validating CONTAINER_TYPE");
+                   // Validating CONTAINER_TYPE
                     if (!validateContainer(inSe))
                     {
                         state = false;
                     }
                 }
-                else if (inSe.type.equals(LANGSTRING_TYPE) && inSe.showTag())
+                else if (inSe.type.Equals("langstring") && inSe.ShowTag())
                 {
-                    debug
-                            .print(metadataEditor.DEBUG,
-                                    "	Validating LANGSTRING_TYPE");
+                    //  Validating LANGSTRING_TYPE
                     if (!validateLangstring(inSe))
                     {
                         state = false;
                     }
                 }
-                else if (inSe.type.equals(STRING_TYPE) && inSe.showTag())
+                else if (inSe.type.Equals("string") && inSe.ShowTag())
                 {
-                    debug.print(metadataEditor.DEBUG, "	Validating STRING_TYPE");
+                    // Validating STRING_TYPE
                     if (!validateString(inSe))
                     {
                         state = false;
                     }
                 }
 
-                else if (inSe.type.equals(VOCABULARY_TYPE) && inSe.showTag())
+                else if (inSe.type.Equals("vocabulary") && inSe.ShowTag())
                 {
-                    debug
-                            .print(metadataEditor.DEBUG,
-                                    "	Validating VOCABULARY_TYPE");
+                    // Validating VOCABULARY_TYPE
                     if (!validateVocabulary(inSe))
                     {
                         state = false;
                     }
                 }
-                else if (inSe.type.equals(DATE_TYPE) && inSe.showTag())
+                else if (inSe.type.Equals("date") && inSe.ShowTag())
                 {
-                    debug.print(metadataEditor.DEBUG, "	Validating DATE_TYPE");
+                    // Validating DATE_TYPE
                     if (!validateDate(inSe))
                     {
                         state = false;
                     }
                 }
-                begin(sNode);
+                Validate(sNode);
             }
-            if (state)
-            {
-                debug.print(metadataEditor.DEBUG, "	FILE IS VALID");
-            }
-            else
-            {
-                debug.print(metadataEditor.DEBUG, "	FILE IS IN-VALID");
-            }
-            debug.print(metadataEditor.DEBUG, "LEAVING Validate.begin()");
-            debug.print(metadataEditor.DEBUG, "returning " + state);
+           
             return (state);
         }
 
@@ -125,12 +107,12 @@ namespace SCORMResourceValidator
             return numErrors;
         }
 
-        public string getErrors()
+        public List<string> getErrors()
         {
             return ErrList;
         }
 
-        public XDocument getmetadataFileXMLObj()
+        public XmlDocument getmetadataFileXMLObj()
         {
             return metadataFileXmlObj;
         }
@@ -143,16 +125,14 @@ namespace SCORMResourceValidator
            return metadataType;
         }
 
-        //helper functions -------------------------------------
-
         public static XmlNodeList getSchemaType(XmlDocument x)
         {
             XmlDocument schemaObj;
             try
             {
                 schemaObj = new XmlDocument();
-                schemaObj.Load(@"C:\Users\kthomann\Documents\Visual Studio 2017\Projects\SCORMResourceValidator\SCORMResourceValidator\Resources\ui_components2004.xml");
-                Resources.
+               // schemaObj.Load(@"C:\Users\kthomann\Documents\Visual Studio 2017\Projects\SCORMResourceValidator\SCORMResourceValidator\Resources\ui_components2004.xml");
+                schemaObj.Load(Resources.ui_components2004);
             }
             catch (Exception e)
             {
@@ -220,5 +200,125 @@ namespace SCORMResourceValidator
             return (sType);
 
         } //end getSchemaType
+
+        //helper functions -------------------------------------
+
+        private static int countTag(XmlNode p, SchemaElement se)
+        {
+            //count the time the tag defined by se occurs under the parent node p in xml document
+            int numFound = 0;
+
+            for (XmlNode c = p.FirstChild; c != null; c = c.NextSibling)
+            {
+                if (c.Name.Equals(se.getXMLTagName()))
+                {
+                    numFound++;
+                }
+            }
+            return (numFound);
+        }
+
+        private Boolean validateContainer(SchemaElement se)
+        {
+            return true;
+        }
+
+        private Boolean validateLangstring(SchemaElement se)
+        {
+           //ENTERING validateLangstring
+
+            // get all elements in document that have tagname = se.getXMLTagName()
+            //XmlNodeList nl = doc.getElementsByTagName(se.getXMLTagName());
+            XmlNodeList nl = metadataFileXmlObj.GetElementsByTagName(se.getXMLTagName());
+            int numElements = nl.Count;
+            Boolean goodElement = true;
+
+
+            tagFound = 0;
+            for (int i = 0; i < numElements; i++)
+            {
+                XmlNode n = (XmlNode)nl.Item(i);
+                // compare the current schema node (se) with the XML doc node (n),
+                // if they at the same level, then do some validating...
+                if (se.samePathFromRoot(n))
+                {
+                    XmlNode child = n.FirstChild.FirstChild;
+                    if (child != null && !child.Value.Trim().Equals(""))
+                    {
+                        tagFound = countTag(n.ParentNode, se); // how many
+                                                                    // times does
+                                                                    // the current
+                                                                    // schemaElement
+                                                                    // tag (se)
+                                                                    // occur under
+                                                                    // parent of n?
+                        
+                        // if tagFound < min OR tagFound > max..then bad
+                        if (tagFound < se.minOccurs || tagFound > se.maxOccurs)
+                        {
+                            goodElement = false;
+                            numErrors++;
+                        }
+                        // if a requiredValue is defined but not present..then bad
+                        if (se.gethasRequiredValue()
+                                && !se.getRequiredValue().Equals(
+                                        child.Value))
+                        {
+                            goodElement = false;
+                            numErrors++;
+                            ErrList.Add(metadataFileName + "~"
+                                    + se.getXMLTagName()
+                                    + " has a required value of "
+                                    + se.getRequiredValue() + " ["
+                                    + child.Value + "]");
+                        }
+                        if (tagFound < se.minOccurs)
+                        {
+                            ErrList.Add(metadataFileName + "~"
+                                    + se.getXMLTagName()
+                                    + " occurs less than the defined minimum of "
+                                    + se.minOccurs + " [" + tagFound + "]");
+                        }
+                        else if (tagFound > se.maxOccurs)
+                        {
+                            ErrList.Add(metadataFileName + "~"
+                                    + se.getXMLTagName()
+                                    + " occurs more than the defined maximum of "
+                                    + se.maxOccurs + " [" + tagFound + "]");
+                        }
+                    }
+                    else
+                    {
+                        goodElement = false;
+                        numErrors++;
+                        ErrList.Add(metadataFileName + "~"
+                                + se.getXMLTagName() + " is a blank element");
+                    }
+                }
+            }
+            
+            // if the number of elements found is >= min and <= max, then return
+            // true (good)
+            return (goodElement);
+
+
+
+           // return true;
+        }
+
+        private Boolean validateString(SchemaElement se)
+        {
+            return true;
+        }
+
+        private Boolean validateVocabulary(SchemaElement se)
+        {
+            return true;
+        }
+
+        private Boolean validateDate(SchemaElement se)
+        {
+            return true;
+        }
     }
 }

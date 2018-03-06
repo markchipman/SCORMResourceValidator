@@ -394,15 +394,44 @@ namespace SCORMResourceValidator
 
 
                 } // end foreach for ZipArchive
-                
+
+
+                // Validate metadata files
+                XmlDocument tempmd = new XmlDocument();
+
                 foreach (var c in ContentAgmetafiles)
                 {
                     string thename = c.Value.ToString();
-                    ZipArchiveEntry entry = archive.GetEntry(thename);
-                    MetadataFile contentmetadatafile = new MetadataFile(XDocument.Load(entry.Open()), thename, "content aggregation");
+                    tempmd.Load(archive.GetEntry(thename).Open());
+                    MetadataFile contentmetadatafile = new MetadataFile(tempmd, thename, "content aggregation");
                     if (!contentmetadatafile.isValid())
                     {
-                        metadatafilesErrors.Add(contentmetadatafile.getErrors());
+                        metadatafilesErrors.AddRange(contentmetadatafile.getErrors());
+                        numinvalidmetadatafiles++;
+                    }
+                }
+
+                foreach (var s in SCOmetafiles)
+                {
+                    string thename = s.Value.ToString();
+                    tempmd.Load(archive.GetEntry(thename).Open());
+                    MetadataFile scometadatafile = new MetadataFile(tempmd, thename, "sco");
+                    if (!scometadatafile.isValid())
+                    {
+                        metadatafilesErrors.AddRange(scometadatafile.getErrors());
+                        numinvalidmetadatafiles++;
+                    }
+                }
+
+                foreach (var a in Assetmetafiles)
+                {
+                    string thename = a.Value.ToString();
+                    tempmd.Load(archive.GetEntry(thename).Open());
+                    MetadataFile assetmetadatafile = new MetadataFile(tempmd, thename, "asset");
+                    if (!assetmetadatafile.isValid())
+                    {
+                        metadatafilesErrors.AddRange(assetmetadatafile.getErrors());
+                        numinvalidmetadatafiles++;
                     }
                 }
 
@@ -413,9 +442,10 @@ namespace SCORMResourceValidator
                 var metadataFilesMissing = metadataXMLfiles.Where(mFile => !pifFiles.Contains(mFile)); // metadata files listed in the manifest but not found in the PIF
                 nummissingmetadatafiles = metadataFilesMissing.Count();
 
-                var invalidmetadataFiles = invalidXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile));
-                var validmetadataFiles = validXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile));
+                var invalidmetadataFiles = invalidXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile)); //fix this or remove
                 numinvalidmetadatafiles = invalidmetadataFiles.Count();
+
+                var validmetadataFiles = validXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile));
                 numvalidmetadatafiles = validmetadataFiles.Count();
 
                 foreach (string file in pifFilesMissing)
@@ -602,8 +632,6 @@ namespace SCORMResourceValidator
 
             // TODO: add list of INVALID metadata files
             logTemplate = logTemplate + metadatafiles_errors;
-
-            logTemplate = logTemplate + " \r\n------------meta-------------------- \r\n \r\n";
 
             logTemplate = logTemplate + metadatafilesErrors + "\r\n";
 

@@ -75,6 +75,7 @@
     <Compile Include="MetadataValidate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchemaElement.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -97,59 +98,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Resources\datatypes.dtd" />
-    <None Include="Resources\imscp_v1p1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0auxresource.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0control.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0delivery.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0limit.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0objective.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0random.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0rollup.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0seqrule.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\imsss_v1p0util.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\ims_xml.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\lom.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\lomCustom.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\lomLoose.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\lomStrict.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\xml.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\XMLSchema.dtd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -172,15 +120,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\adlcp_v1p3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\adlnav_v1p3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\adlseq_v1p3.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Resources\alert-triangle-red_icon.png" />
   </ItemGroup>
   <ItemGroup>

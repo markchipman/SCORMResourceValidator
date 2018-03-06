@@ -19,7 +19,7 @@ namespace SCORMResourceValidator.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -77,6 +77,27 @@ namespace SCORMResourceValidator.Properties {
             get {
                 object obj = ResourceManager.GetObject("alert-triangle-redyellow_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;MetadataEditorConfiguration&gt;
+        ///	&lt;sco&gt;
+        ///		&lt;general name=&quot;&quot; minOccurs=&quot;1&quot; maxOccurs=&quot;1&quot; type=&quot;container&quot;
+        ///			showTag=&quot;true&quot;&gt;
+        ///			&lt;identifier name=&quot;&quot; minOccurs=&quot;1&quot; maxOccurs=&quot;10&quot;
+        ///				type=&quot;container&quot; showTag=&quot;true&quot;&gt;
+        ///				&lt;catalog name=&quot;&quot; minOccurs=&quot;0&quot; maxOccurs=&quot;1&quot;
+        ///					type=&quot;string:1000&quot; requiredValue=&quot;ATIA&quot; showTag=&quot;true&quot; /&gt;
+        ///				&lt;entry name=&quot;&quot; minOccurs=&quot;1&quot; maxOccurs=&quot;1&quot;
+        ///					type=&quot;string:1000&quot; requiredValue=&quot;TBD&quot; showTag=&quot;true&quot; /&gt;
+        ///			&lt;/identifier&gt;
+        ///			&lt;title name [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ui_components2004 {
+            get {
+                return ResourceManager.GetString("ui_components2004", resourceCulture);
             }
         }
     }
