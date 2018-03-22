@@ -39,7 +39,8 @@ namespace SCORMResourceValidator
         private int numinvalidmetadatafiles = 0;
         private int nummissingmetadatafiles = 0;
         private string metadatafiles_errors = "";
-        private List<string> metadatafilesErrors;
+        private List<string> metadatafilesErrors = new List<string>();
+        private List<string> metadataFilesMissing = new List<string>();
 
         public Form1()
         {
@@ -258,7 +259,7 @@ namespace SCORMResourceValidator
             List<string> manifestFiles = new List<string>();
             ZipArchive archive;
             XDocument manifest;
-            XDocument tempXml;
+            //XDocument tempXml;
             // XmlSchemaSet schemas = new XmlSchemaSet();
             // XmlSchema tempschema;
 
@@ -283,8 +284,6 @@ namespace SCORMResourceValidator
                     return false;
                 }
 
-                //intPIFFilesFoundCount = archive.Entries.Count;
-
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     
@@ -297,12 +296,6 @@ namespace SCORMResourceValidator
                     {
                         pifFiles.Add(entryFilename);
                         listPIFFilesFound.Items.Add(entryFilename);
-                    }
-
-                    if (!entryFilename.Substring(entryFilename.Length - 3).Equals("dtd") && isSCORMSchemaFile(entryFilename))
-                    {
-                       // tempschema = XmlSchema.Read(entry.Open(),null);
-                       // schemas.Add(tempschema);
                     }
 
                     if (entryFilename == "imsmanifest.xml")
@@ -322,13 +315,24 @@ namespace SCORMResourceValidator
                         XNamespace mdns = "http://www.adlnet.org/xsd/adlcp_v1p3";
 
                         // This creates the lists and counts of all the files listed in the Manifest
-                        // TODO: Also figures out what it's metadata type is
+
                         var mdFiles = manifest.Root.Descendants(ns + "metadata").Descendants(mdns + "location");
                         var files = manifest.Root.Descendants(ns + "file");
+                        //manifest.Root.Attribute
                        
                         foreach (var file in files)
                         {
                             String filename = WebUtility.UrlDecode(file.Attribute("href").Value);
+                            //check the Attributes of resources and see if there is any additional path
+                            var attrbts = file.Parent.Attributes();
+                            foreach (XAttribute z in attrbts)
+                            {
+                                if (z.Name.ToString().Contains("base"))
+                                {
+                                    filename = z.Value.ToString().Trim() + filename;
+                                }
+                            }
+                               
                             if (!isSCORMSchemaFile(filename))
                             {
                                 manifestFiles.Add(filename);
@@ -381,72 +385,24 @@ namespace SCORMResourceValidator
                         lblStatus.BackColor = Color.FromArgb(200, 255, 200);
                         linkViewLogs.Visible = true;
                     } // end imsmanifest if
-                    else if (entryFilename.Contains(".xml"))
-                    {
-                       // tempXml = XDocument.Load(entry.Open());
-
-                        /*
-                        if (isValidXML(entry)) validXMLfiles.Add(entryFilename);
-                        else invalidXMLfiles.Add(entryFilename);
-                        */
-
-                    }
+                    
 
 
                 } // end foreach for ZipArchive
 
 
                 // Validate metadata files
-                XmlDocument tempmd = new XmlDocument();
-
-                foreach (var c in ContentAgmetafiles)
-                {
-                    string thename = c.Value.ToString();
-                    tempmd.Load(archive.GetEntry(thename).Open());
-                    MetadataFile contentmetadatafile = new MetadataFile(tempmd, thename, "content aggregation");
-                    if (!contentmetadatafile.isValid())
-                    {
-                        metadatafilesErrors.AddRange(contentmetadatafile.getErrors());
-                        numinvalidmetadatafiles++;
-                    }
-                }
-
-                foreach (var s in SCOmetafiles)
-                {
-                    string thename = s.Value.ToString();
-                    tempmd.Load(archive.GetEntry(thename).Open());
-                    MetadataFile scometadatafile = new MetadataFile(tempmd, thename, "sco");
-                    if (!scometadatafile.isValid())
-                    {
-                        metadatafilesErrors.AddRange(scometadatafile.getErrors());
-                        numinvalidmetadatafiles++;
-                    }
-                }
-
-                foreach (var a in Assetmetafiles)
-                {
-                    string thename = a.Value.ToString();
-                    tempmd.Load(archive.GetEntry(thename).Open());
-                    MetadataFile assetmetadatafile = new MetadataFile(tempmd, thename, "asset");
-                    if (!assetmetadatafile.isValid())
-                    {
-                        metadatafilesErrors.AddRange(assetmetadatafile.getErrors());
-                        numinvalidmetadatafiles++;
-                    }
-                }
-
+                ValidateMetadatafiles(ContentAgmetafiles, archive, "content aggregation");
+                ValidateMetadatafiles(SCOmetafiles, archive, "sco");
+                ValidateMetadatafiles(Assetmetafiles, archive, "asset");
+                
                 // Compare PIF and manifest lists to generate the lists of missing files
                 var pifFilesMissing = manifestFiles.Where(mFile => !pifFiles.Contains(mFile)); // these are files listed in the manifest but not found in the PIF
                 var manifestFilesMissing = pifFiles.Where(pFile => !manifestFiles.Contains(pFile)); // these are non-schema files found in the PIF but are not listed in the manifest
 
-                var metadataFilesMissing = metadataXMLfiles.Where(mFile => !pifFiles.Contains(mFile)); // metadata files listed in the manifest but not found in the PIF
-                nummissingmetadatafiles = metadataFilesMissing.Count();
+                //var metadataFilesMissing = metadataXMLfiles.Where(mFile => !pifFiles.Contains(mFile)); // metadata files listed in the manifest but not found in the PIF
+                //nummissingmetadatafiles = metadataFilesMissing.Count();
 
-                var invalidmetadataFiles = invalidXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile)); //fix this or remove
-                numinvalidmetadatafiles = invalidmetadataFiles.Count();
-
-                var validmetadataFiles = validXMLfiles.Where(mFile => metadataXMLfiles.Contains(mFile));
-                numvalidmetadatafiles = validmetadataFiles.Count();
 
                 foreach (string file in pifFilesMissing)
                 {
@@ -555,7 +511,7 @@ namespace SCORMResourceValidator
             //Generate Metadata logs - take out for now until can recreate the whole Metadata parse
              logHTMLTemplate = createMetadataDocTemplate("METADATA FILE REPORT");
              System.IO.Directory.CreateDirectory(strLogDir);
-             System.IO.File.WriteAllText(strLogDir + @"\metadata_file_report.doc", logHTMLTemplate);
+             System.IO.File.WriteAllText(strLogDir + @"\ValidateMD.doc", logHTMLTemplate);
              
 
             //Generate checksum
@@ -630,14 +586,73 @@ namespace SCORMResourceValidator
             logTemplate = logTemplate + "INVALID METADATA FILE DETAILS BELOW: \r\n \r\n";
             logTemplate = logTemplate + "------------------------------------ \r\n \r\n";
 
-            // TODO: add list of INVALID metadata files
-            logTemplate = logTemplate + metadatafiles_errors;
+            string tempfilename = "";
+            int filenumber = 1;
+            List<string> errmsgs = new List<string>();
 
-            logTemplate = logTemplate + metadatafilesErrors + "\r\n";
+            foreach (string x in metadatafilesErrors)
+            {
+                string[] xm = x.Split('~');
+                if (tempfilename == "")
+                {
+                    tempfilename = xm[0];
+                    logTemplate = logTemplate + "\r\n File #" + filenumber + " = " + tempfilename + "\r\n";
+                }
+                else
+                {
+                    if (tempfilename != xm[0])
+                    {
+                        logTemplate = logTemplate + "\r\n Errors found: " + errmsgs.Count() + "\r\n \r\n ==============\r\n";
+                        foreach(string errs in errmsgs)
+                        {
+                            logTemplate = logTemplate + "\r\n " + errs + "\r\n";
+                        }
+                        logTemplate = logTemplate + "\r\n -------------- \r\n \r\n";
+                        filenumber++;
+                        tempfilename = xm[0];
+                        logTemplate = logTemplate + "\r\n File #" + filenumber + " = " + tempfilename + "\r\n";
+                        errmsgs.Clear();
+                    
+                    }
+                }                
+                errmsgs.Add(xm[1]);
 
-            
 
-                return logTemplate;
+            }
+            if (errmsgs.Count() > 0)
+            {
+                logTemplate = logTemplate + "\r\n Errors found: " + errmsgs.Count() + "\r\n \r\n ==============\r\n";
+                foreach (string errs in errmsgs)
+                {
+                    logTemplate = logTemplate + "\r\n " + errs + "\r\n";
+                }
+                
+                if (metadataFilesMissing.Count == 0)
+                {
+                    logTemplate = logTemplate + "\r\n -------------- \r\n \r\n \r\n";
+                }
+                else
+                {
+                    logTemplate = logTemplate + "\r\n \r\n ==============\r\n \r\n";
+                }
+                    
+            }
+
+            //do missing metadata files here
+            if (metadataFilesMissing.Count > 0)
+            {
+                logTemplate = logTemplate + "The following METADATA File";
+                if (metadataFilesMissing.Count > 1) logTemplate = logTemplate + "s are";
+                logTemplate = logTemplate + " listed in the Mainfest but not found in the PIF: \r\n \r\n";
+                foreach (string mdm in metadataFilesMissing)
+                {
+                    logTemplate = logTemplate + mdm + "\r\n";
+                }
+                logTemplate = logTemplate + "\r\n -------------- \r\n \r\n \r\n";
+            }
+
+
+            return logTemplate;
         }
 
         /// <summary>
@@ -745,7 +760,7 @@ namespace SCORMResourceValidator
         /// </summary>
         private void displayAboutBox()
         {
-            System.Windows.Forms.MessageBox.Show("SCORM Resource Validator v2.0\n© 2017 JANUS Research Group", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            System.Windows.Forms.MessageBox.Show("SCORM Resource Validator v2.1\n© 2018 JANUS Research Group", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -786,42 +801,7 @@ namespace SCORMResourceValidator
         {
             System.Diagnostics.Process.Start(strLogDir);
         }
-
-
-        /// <summary>
-        /// Validate if a document from a zip file is a valid XML file
-        /// </summary>
-        /// <param name="xmlentry"></param>
-        /// <returns>bool</returns>
-        private Boolean isValidXML(ZipArchiveEntry xmlentry)
-        {
-             try
-             {
-                 XDocument m = XDocument.Load(xmlentry.Open());
-                MetadataValidate metadataValidate = new MetadataValidate();
-                metadataValidate.Check(xmlentry.Open());
-                m.Validate(metadataValidate.getSchemaSets(), (o, e) =>
-                {
-                    metadatafiles_errors = metadatafiles_errors + e.Message;
-                });
-             }
-             catch 
-             {
-                return false;
-             } 
-             
-            
-            /*
-
-            if (metadataValidate.geterrors() != "")
-            {
-                metadatafiles_errors = metadatafiles_errors + metadataValidate.geterrors();
-                return false;
-            }
-            */
-            return true;
-        }
-
+        
         /// <summary>
         /// Compares two files Byte by Byte.
         /// </summary>
@@ -996,7 +976,44 @@ namespace SCORMResourceValidator
             }
         }
 
-      
+        /// <summary>
+        /// Does validation and sets the counts for the metadata files
+        /// </summary>
+        /// <param name="input">path and file name of the file to create a hash for</param>
+        /// 
+        private void ValidateMetadatafiles(IEnumerable<XElement> metadatafiles, ZipArchive ziparchive, string themetadatatype)
+        {
+            XmlDocument tempmd = new XmlDocument();
+            ZipArchiveEntry tempzipentry;
+
+            foreach (var c in metadatafiles)
+            {
+                string thename = c.Value.ToString();
+                tempzipentry = ziparchive.GetEntry(thename);
+                if (tempzipentry is null)
+                {
+                    nummissingmetadatafiles++;
+                    metadataFilesMissing.Add(thename);
+                } 
+                else
+                {
+                    tempmd.Load(ziparchive.GetEntry(thename).Open());
+                    MetadataFile themetadatafile = new MetadataFile(tempmd, thename, themetadatatype);
+                    if (!themetadatafile.isValid())
+                    {
+                        metadatafilesErrors.AddRange(themetadatafile.getErrors());
+                        numinvalidmetadatafiles++;
+                    }
+                    else
+                    {
+                        numvalidmetadatafiles++;
+                    }
+                }
+                
+            }
+        }
+
+
 
 
     }

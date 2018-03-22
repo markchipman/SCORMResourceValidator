@@ -72,7 +72,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="MetadataFile.cs" />
-    <Compile Include="MetadataValidate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SchemaElement.cs" />

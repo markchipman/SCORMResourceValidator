@@ -18,8 +18,8 @@ namespace SCORMResourceValidator
 	private static  String     SHOWTAG				= "showTag";
 	private static  String     ISSELECTABLE		= "isSelectable";
 	private static  String     REQUIREDVALUE		= "requiredValue";
-	private static  String     TYPE_DELIM 			= ":";
-	private static  String     VOCAB_DELIM 		= ",";
+	//private static  String     TYPE_DELIM 			= ":";
+	//private static  String     VOCAB_DELIM 		= ",";
 	private static  String     BLANK		 		= "";
 	public static  int UNBOUND = 999999;
 
@@ -81,7 +81,7 @@ namespace SCORMResourceValidator
                     string[] st = thisAtt.Value.Split(':');
                     if (st.Count() > 1)
                     {
-                        type = st[1];
+                        type = st[0];
                     }
                     else
                     {
@@ -96,7 +96,7 @@ namespace SCORMResourceValidator
                     vocab.Add("No Selection");
                     for (int j = 0; j < numToks; j++)
                     {
-                        vocab.Add(st[1].Trim());
+                        vocab.Add(st[j].Trim());
                     }
                     vocab.Add("Other");
                 }
