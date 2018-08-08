@@ -41,6 +41,36 @@ namespace SCORMResourceValidator
         private string metadatafiles_errors = "";
         private List<string> metadatafilesErrors = new List<string>();
         private List<string> metadataFilesMissing = new List<string>();
+        private bool ShouldBeQuiz = false;
+
+        //vars for parsing the ADL test suite logs
+        private string ADLTestSuiteSummaryfile = "";
+        private string ADLTestSuiteDetailsfile = "";
+        private string ADLTestSuiteLuanchDetailsfile = "";
+        private bool AllADLTestSuitefilesfound = false;
+        private bool CPCTS_conformant = true;//Content Package Conformance Test Summary
+        private bool CPCTD_conformant = true;//Content Package Conformance Test Details
+        private bool SCO_runtime_conformant = true;//Sharable Content Object (SCO) Run-Time Environment Conformance Test
+        private bool SCO_conformant = true;//have to have two of these because the previous one comes from the launch detail file  and the other from the summary file
+        public struct LogValues
+        {
+            public string item_name;
+            public int twritten_Count;
+            public string twritten_value;
+            public int trecieved_Count;
+            public string trecieved_value;
+            public string error;
+        };
+        private List<SCOInfo> SCOList = new List<SCOInfo>();
+        private List<LogValues> mainCGIcalls = new List<LogValues>();
+        private List<LogValues> extraCGIcalls = new List<LogValues>();
+        struct RuntimeErrormsgs
+        {
+            public string sco;
+            public string item;
+            public string error;
+        }
+        List <RuntimeErrormsgs> SCORuntimeErrors = new List<RuntimeErrormsgs>();
 
         public Form1()
         {
@@ -91,7 +121,8 @@ namespace SCORMResourceValidator
             logFilelist.Add("manifest_files_missing.html");
             logFilelist.Add("packaged_files_found.html");
             logFilelist.Add("packaged_files_missing.html");
-            logFilelist.Add("metadata_file_report.doc");
+            //logFilelist.Add("metadata_file_report.doc");
+            logFilelist.Add("ValidateMD.doc");
             logFilelist.Add("PIF_file_validate.txt");
 
 
@@ -131,15 +162,25 @@ namespace SCORMResourceValidator
             
         }
 
+        private void btnSelectADLLogDir_Click(object sender, EventArgs e)
+        {
+            if (ADLlogFolderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                lblADLlogFileDir.Text = ADLlogFolderBrowserDialog.SelectedPath;
+            }
+            
+        }
+
 
         private void btnValidate_Click(object sender, EventArgs e)
         {
-          //  resettheForm();
+          
             if (readPIFFile())
             {
                 turnOnGUI();
                 createLogs();
                 compareLogs();
+                parseLogs();
             }
         }
 
@@ -170,6 +211,7 @@ namespace SCORMResourceValidator
             listManifestFilesMissing.BackColor = SystemColors.ControlLight;
 
             lblStatus.Text = "";
+            ShouldBeQuiz = false;
 
             //Metadata counts
             numMetadatafiles = 0;
@@ -183,14 +225,34 @@ namespace SCORMResourceValidator
 
             validXMLfiles.Clear();
             invalidXMLfiles.Clear();
+            metadataXMLfiles.Clear();
+            metadatafilesErrors.Clear();
+
 
             //optional Log file folder chooser
             logFolderBrowserDialog.Reset();
+            ADLlogFolderBrowserDialog.Reset();
             lblLogFileDir.Text = "No Directory selected";
+            lblADLlogFileDir.Text = "No Directory selected";
             lbllogvalidate.Visible = false;
+            lblTSlogvalidate.Visible = false;
             warningLogsfail.Visible = false;
             warningPiffmissing.Visible = false;
             warningMFMising.Visible = false;
+            warningtestsuitelogfail.Visible = false;
+
+
+            //optional Log parser
+            CPCTS_conformant = true;
+            CPCTD_conformant = true;
+            SCO_runtime_conformant = true;
+            SCO_conformant = true;
+            SCOList.Clear();
+            mainCGIcalls.Clear();
+            extraCGIcalls.Clear();
+            ADLTestSuiteSummaryfile = "";
+            ADLTestSuiteDetailsfile = "";
+            ADLTestSuiteLuanchDetailsfile = "";
 
         }
 
@@ -244,6 +306,7 @@ namespace SCORMResourceValidator
 
             btnValidate.Enabled = true;
             btnSelectLogDir.Enabled = true;
+            btnSelectADLLogDir.Enabled = true;
 
             resettheForm();
         }
@@ -289,7 +352,9 @@ namespace SCORMResourceValidator
                     
                     
                     String entryFilename = WebUtility.UrlDecode(entry.FullName);
-                    if(!entryFilename.Substring(entryFilename.Length - 1).Equals("/"))
+                    entryFilename = entryFilename.Replace("\\", "/");
+                    //String entryFilename = entry.FullName;
+                    if (!entryFilename.Substring(entryFilename.Length - 1).Equals("/"))
                         { intPIFFilesFoundCount++; }
 
                     if (!entryFilename.Substring(entryFilename.Length - 1).Equals("/") && !isSCORMSchemaFile(entryFilename))
@@ -313,16 +378,22 @@ namespace SCORMResourceValidator
 
                         XNamespace ns = manifest.Root.Attribute("xmlns").Value;// "http://www.imsglobal.org/xsd/imscp_v1p1";
                         XNamespace mdns = "http://www.adlnet.org/xsd/adlcp_v1p3";
+                        XNamespace imsss = "http://www.imsglobal.org/xsd/imsss";
 
                         // This creates the lists and counts of all the files listed in the Manifest
 
                         var mdFiles = manifest.Root.Descendants(ns + "metadata").Descendants(mdns + "location");
                         var files = manifest.Root.Descendants(ns + "file");
+                        var mm = manifest.Root.Descendants(imsss + "minNormalizedMeasure");
+                        
+                        if (mm.Count() > 0) ShouldBeQuiz = true; 
+                        
                         //manifest.Root.Attribute
                        
                         foreach (var file in files)
                         {
-                            String filename = WebUtility.UrlDecode(file.Attribute("href").Value);
+                           String filename = WebUtility.UrlDecode(file.Attribute("href").Value);
+                            
                             //check the Attributes of resources and see if there is any additional path
                             var attrbts = file.Parent.Attributes();
                             foreach (XAttribute z in attrbts)
@@ -335,7 +406,7 @@ namespace SCORMResourceValidator
                                
                             if (!isSCORMSchemaFile(filename))
                             {
-                                manifestFiles.Add(filename);
+                                manifestFiles.Add(filename.Normalize());
                                 listManifestFilesFound.Items.Add(filename);
                                 intManifestFilesFoundCount++;
                             }
@@ -344,6 +415,7 @@ namespace SCORMResourceValidator
                         foreach (var mdFile in mdFiles)
                         {
                             String mdFilename = WebUtility.UrlDecode(mdFile.Value);
+
                             if (!manifestFiles.Contains(mdFilename))
                             {
                                 manifestFiles.Add(mdFilename);
@@ -353,32 +425,58 @@ namespace SCORMResourceValidator
                         }
 
                         // This gets the counts of the metadata files
-                        
-                        ContentAgmetafiles = manifest.Root.Descendants(ns + "organizations").Descendants(ns + "metadata").Descendants(mdns + "location");
-                        foreach (var ContentAgmetafile in ContentAgmetafiles)
+                        // Doing these in the reverse order than they are in the manifest
+                        // to catch record the last section any duplicates (that is how
+                        // it works in the meta data editor
+
+
+
+                        Assetmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "asset").Descendants(mdns + "location");
+                        foreach (var Assetfile in Assetmetafiles)
                         {
-                            numContentAgMetadatafiles++;
-                            numMetadatafiles++;
-                            metadataXMLfiles.Add(ContentAgmetafile.Value.ToString());
+
+
+                            if (!metadataXMLfiles.Contains(Assetfile.Value.ToString()))
+                            {
+                                numMetadatafiles++;
+                                metadataXMLfiles.Add(Assetfile.Value.ToString());
+                                ValidateMetadatafile(Assetfile.Value.ToString(), archive, "asset");
+                                numAssetmetadatafiles++;
+                            }
+
+
                         }
 
                         SCOmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "sco").Descendants(mdns + "location");
                         foreach (var SCOfile in SCOmetafiles)
                         {
-                            numSCOmetadatafiles++;
-                            numMetadatafiles++;
-                            metadataXMLfiles.Add(SCOfile.Value.ToString());
+                            
+                            
+                            if (!metadataXMLfiles.Contains(SCOfile.Value.ToString()))
+                            {
+                                numMetadatafiles++;
+                                metadataXMLfiles.Add(SCOfile.Value.ToString());
+                                ValidateMetadatafile(SCOfile.Value.ToString(), archive, "sco");
+                                numSCOmetadatafiles++;
+                            }
+
                         }
 
-                        Assetmetafiles = manifest.Root.Descendants(ns + "resources").Descendants(ns + "resource").Where(el => el.Attribute(mdns + "scormType").Value == "asset").Descendants(mdns + "location");
-                        foreach (var Assetfile in Assetmetafiles)
+                        ContentAgmetafiles = manifest.Root.Descendants(ns + "organizations").Descendants(ns + "metadata").Descendants(mdns + "location");
+                        foreach (var ContentAgmetafile in ContentAgmetafiles)
                         {
-                            numAssetmetadatafiles++;
-                            numMetadatafiles++;
-                            metadataXMLfiles.Add(Assetfile.Value.ToString());
-                            
+
+
+                            if (!metadataXMLfiles.Contains(ContentAgmetafile.Value.ToString()))
+                            {
+                                numMetadatafiles++;
+                                metadataXMLfiles.Add(ContentAgmetafile.Value.ToString());
+                                ValidateMetadatafile(ContentAgmetafile.Value.ToString(), archive, "content aggregation");
+                                numContentAgMetadatafiles++;
+                            }
+
                         }
-                        
+
                         // Set styles
                         lblStatus.BorderStyle = BorderStyle.FixedSingle;
                         lblStatus.Text = "Success! Saved logs for " + strPIFFilename + ".";
@@ -392,17 +490,28 @@ namespace SCORMResourceValidator
 
 
                 // Validate metadata files
-                ValidateMetadatafiles(ContentAgmetafiles, archive, "content aggregation");
+                //moved this to above because multi-sco Pifs were miscounting things
+              /*  ValidateMetadatafiles(ContentAgmetafiles, archive, "content aggregation");
                 ValidateMetadatafiles(SCOmetafiles, archive, "sco");
-                ValidateMetadatafiles(Assetmetafiles, archive, "asset");
+                ValidateMetadatafiles(Assetmetafiles, archive, "asset"); 
+                */
                 
                 // Compare PIF and manifest lists to generate the lists of missing files
-                var pifFilesMissing = manifestFiles.Where(mFile => !pifFiles.Contains(mFile)); // these are files listed in the manifest but not found in the PIF
+                var pifFilesMissing = manifestFiles.Where(mFile => !pifFiles.Contains(mFile.Trim())); // these are files listed in the manifest but not found in the PIF
                 var manifestFilesMissing = pifFiles.Where(pFile => !manifestFiles.Contains(pFile)); // these are non-schema files found in the PIF but are not listed in the manifest
 
                 //var metadataFilesMissing = metadataXMLfiles.Where(mFile => !pifFiles.Contains(mFile)); // metadata files listed in the manifest but not found in the PIF
                 //nummissingmetadatafiles = metadataFilesMissing.Count();
+              /*  List<string> pifFilesMissing = new List<string>();
 
+                foreach (string mfl in manifestFiles)
+                {
+                    if (!pifFiles.Contains(mfl))
+                    {
+                        pifFilesMissing.Add(mfl);
+                    }
+                }
+                */
 
                 foreach (string file in pifFilesMissing)
                 {
@@ -434,6 +543,7 @@ namespace SCORMResourceValidator
         {
             btnValidate.Enabled = false;
             btnSelectLogDir.Enabled = false;
+            btnSelectADLLogDir.Enabled = false; 
 
             grpPIFFilesFound.Text += " (" + intPIFFilesFoundCount + " files) - packaged_files_found.html";
             grpManifestFilesFound.Text += " (" + intManifestFilesFoundCount + " files) - manifest_files_found.html";
@@ -511,13 +621,15 @@ namespace SCORMResourceValidator
             //Generate Metadata logs - take out for now until can recreate the whole Metadata parse
              logHTMLTemplate = createMetadataDocTemplate("METADATA FILE REPORT");
              System.IO.Directory.CreateDirectory(strLogDir);
-             System.IO.File.WriteAllText(strLogDir + @"\ValidateMD.doc", logHTMLTemplate);
-             
+            System.IO.File.WriteAllText(strLogDir + @"\ValidateMD.doc", logHTMLTemplate);
+            //System.IO.File.WriteAllText(strLogDir + @"\metadata_file_report.doc", logHTMLTemplate);
 
             //Generate checksum
             string sdf = "";
             sdf = GetMD5HashFromFile(openFileDialog1.FileName);
             System.IO.File.WriteAllText(strLogDir + @"\PIF_file_validate.txt", sdf);
+
+
 
         }
 
@@ -697,6 +809,336 @@ namespace SCORMResourceValidator
         }
 
         /// <summary>
+        /// Creates an HTML log file with file counts using the specified ListBox, type, title, and description.
+        /// </summary>
+        /// <param name="Validationresults">dictionary object that contains the results of the validation of the log files</param>
+        /// <returns>An HTML page string for the log file.</returns>
+        private string createLogParserHTMLTemplate(List<string> cPSErrors, List<string> cPSLMeatdataErrors, List<string> cPSLSCOErrors, List<string> CPDLWarnErrors, bool CPDLWell, bool CPDLvalid)
+        {
+            string adlsummaryfilename = ADLTestSuiteSummaryfile;
+            string adldetailsfilename = ADLTestSuiteDetailsfile;           
+            String logHTMLTemplate = "";
+
+            //Manifest files missing *****************************************************************************************************************************
+            logHTMLTemplate = logHTMLTemplate + "<h3> Summary of Resource Validator Manifest Files Missing : manifest_files_missing.html</h3>";
+            if (intManifestFilesMissingCount == 0)
+            logHTMLTemplate = logHTMLTemplate + "<h2>This log is conformant</h2><br>";
+            else
+            {
+                //  logHTMLTemplate = logHTMLTemplate + "There are " + intManifestFilesMissingCount.ToString() + " missing.";
+                logHTMLTemplate = logHTMLTemplate + "<table border='1'><tr><th>Files Listed in Manifest that are not in the package</th></tr>";
+                logHTMLTemplate = logHTMLTemplate + "<tr><td>";
+                foreach (string file in listManifestFilesMissing.Items)
+                {
+                    logHTMLTemplate = logHTMLTemplate + file.Replace(" / ", @"\") + "<br>";
+                }
+                logHTMLTemplate = logHTMLTemplate + "</td></tr></table>";
+            }
+
+            //Package files missing *****************************************************************************************************************************
+            logHTMLTemplate = logHTMLTemplate + "<h3>Summary of Resource Validator Packaged Files Missing : packaged_files_missing.html</h3>";
+            if (intPIFFilesMissingCount == 0)
+                logHTMLTemplate = logHTMLTemplate + "<h3>There are no extra files</h3>";
+            else
+            {
+                logHTMLTemplate = logHTMLTemplate + "<table border='1'><tr><th>Files present in the package, but not listed on the Manifest</th></tr>";
+                logHTMLTemplate = logHTMLTemplate + "<tr><td>";
+                foreach (string file in listPIFFilesMissing.Items)
+                {
+                    logHTMLTemplate = logHTMLTemplate + file.Replace(" / ", @"\") + "<br>";
+                }
+                logHTMLTemplate = logHTMLTemplate + "</td></tr></table>";
+            }
+            logHTMLTemplate = logHTMLTemplate + "<p>";
+            logHTMLTemplate = logHTMLTemplate + "<em>Total files contained in this package: " + intPIFFilesFoundCount.ToString() +  "</em>";
+            logHTMLTemplate = logHTMLTemplate + "</p><br>";
+
+            //ADL testsuite Summary file *****************************************************************************************************************************
+            logHTMLTemplate = logHTMLTemplate + "<h3>Summary of Content Package Conformance Test Summary: " + Path.GetFileName(ADLTestSuiteSummaryfile) + "</h3>";
+            logHTMLTemplate = logHTMLTemplate + "<ol>";
+            
+            if (cPSErrors.Count() > 0)
+            {
+              
+              foreach(var i in cPSErrors)
+                {
+                    logHTMLTemplate = logHTMLTemplate + "<li><font color=\"red\">Manifest Summary: </font>" + i.ToString() + " </li>";
+                }
+                CPCTS_conformant = false;
+            }
+            else
+            {
+            logHTMLTemplate = logHTMLTemplate + "<li>Manifest Summary: There are no errors in the Manifest.</li>";
+
+            }
+
+            if (cPSLMeatdataErrors.Count() > 0)
+            {
+                
+                foreach (var i in cPSErrors)
+                {
+                    logHTMLTemplate = logHTMLTemplate + "<li><font color=\"red\">Meta-data Testing: </font>" + i + "</li>";
+                }
+            }
+            else
+            {
+                logHTMLTemplate = logHTMLTemplate + "<li>Meta-data Testing: There are no errors in the Meta-data.</li>";
+            }
+
+            if (SCOList.Count > 0)
+            {
+                if (!SCO_conformant)
+                {
+                    logHTMLTemplate = logHTMLTemplate + "<li><font color=\"red\">SCO Testing: </font>One or more SCO's contain errors.</li>";
+                }
+                else
+                {
+                    logHTMLTemplate = logHTMLTemplate + "<li>SCO Testing: There are no errors in the SCO's.</li>";
+                }
+               
+            }
+                            
+            logHTMLTemplate = logHTMLTemplate + "</ol>";
+
+            //Lists errors for SCOs found in the ADL testsuite Summary file
+            if (!SCO_conformant)
+            {
+                foreach (SCOInfo s in SCOList)
+                {
+                    if (s.getSummaryLogErrorsCount() > 0)
+                    {
+                        logHTMLTemplate += "<h3>" + s.getSCOname() + "</h3>";
+                        logHTMLTemplate += "<p>" + s.getLaunchfile() + "</p>";
+                        logHTMLTemplate += "<table border=\"1\"><tbody><tr><th>Error Message</th></tr>";
+                        logHTMLTemplate += "<tr><td class=\"error\">";
+                        foreach(string ers in s.getSummaryLogErrors())
+                        {
+                            if (s.getSummaryLogErrors().IndexOf(ers) > 0) logHTMLTemplate += ", ";
+                            logHTMLTemplate += ers;
+                        }
+                        logHTMLTemplate += "</td></tr></tbody></table>";
+                    }
+                }
+            }
+            logHTMLTemplate += "<br>";
+            
+            //ADL testsuite Details file *****************************************************************************************************************************
+
+            logHTMLTemplate = logHTMLTemplate + "<h3>Summary of Content Package Conformance Test Details : " + Path.GetFileName(ADLTestSuiteDetailsfile) + "</h3>";
+            logHTMLTemplate = logHTMLTemplate + "<ol>";
+            
+            if (CPDLWell)
+            {
+            logHTMLTemplate = logHTMLTemplate + "<li>Manifest Instance: The Manifest Instance is well-formed</li>";
+
+            }
+            if (CPDLvalid)
+            {
+                logHTMLTemplate = logHTMLTemplate + "<li>Manifest Instance: The Manifest Instance is valid</li>";
+            }
+            if (CPDLvalid && CPDLWell)
+            {
+                logHTMLTemplate = logHTMLTemplate + "<li>Manifest Instance: The manifest instance is minimum conformant</li>";
+            }
+            else
+            {
+                logHTMLTemplate = logHTMLTemplate + "<li><font color='red'>Manifest Instance:</font> The manifest instance is NOT minimum conformant</li>";
+            }
+            logHTMLTemplate = logHTMLTemplate + "</ol><br>";
+
+            if (CPDLWarnErrors.Count() > 0)
+            {
+                logHTMLTemplate = logHTMLTemplate + "<table border='1'>";
+                logHTMLTemplate = logHTMLTemplate + "<tbody><tr><th>General error and warning messages</th></tr>";
+                foreach(string r in CPDLWarnErrors)
+                {
+                    logHTMLTemplate +=  "<tr><td class=\"error\">" + r + "</td></tr>";
+
+                }
+                logHTMLTemplate = logHTMLTemplate + "</tbody></table><br>";
+
+            }
+
+            // Summary /SCO log data *****************************************************************************************************************************
+
+            logHTMLTemplate = logHTMLTemplate + "<h3> Summary of Sharable Content Object (SCO) Run-Time Environment Conformance Test : " + Path.GetFileName(ADLTestSuiteSummaryfile) + "</h3>";
+            if (SCO_runtime_conformant) 
+                logHTMLTemplate = logHTMLTemplate + "<h2>The Runtime Log is conformant</h2>";
+            else
+            {
+                logHTMLTemplate = logHTMLTemplate + "<table border='1'><tbody>";
+                logHTMLTemplate = logHTMLTemplate + "<tr><th class='conform'>SCO Identifier</th><th class='errors'>Error</th></tr>";
+
+
+                if (ADLTestSuiteLuanchDetailsfile == "")
+                {
+                    
+                    logHTMLTemplate = logHTMLTemplate + "<tr><td class=\"conform\">NO_SCO</td>" +
+                        "<td><ul><li class=\"error\">Log Contains No SCOs!<ul><li class=\"normal\">This log file contains no SCOs. Make sure that this is a valid Runtime log</li>" +
+                        "<li><a href=\"" + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\") + 1) + "\">Detail File</a></li></ul></li></ul>" +
+                        "</td></tr>";
+                }
+                else
+                {
+                    string templht = "";
+                    int errorcount = 0;
+                    foreach (var sco in SCOList)
+                    {
+                        templht = templht + "<tr><td class=\"conform\">" + sco.getSCOname() + "</td><td><ul>";
+                    
+                        foreach (var c in sco.getmainCGIcalls())
+                        {
+                            if(c.error != "")
+                            {
+                                    templht = templht + "<li class=\"error\">" + c.item_name;
+                                    templht = templht + "<ul><li class=\"normal\">" + c.error + "</li></ul></li>";
+                                    errorcount++;
+                            }
+                        }
+                        foreach (var c in sco.getextraCGIcalls())
+                        {
+                            if (c.error != "")
+                            {
+                                templht = templht + "<li class=\"error\">" + c.item_name;
+                                templht = templht + "<ul><li class=\"normal\">" + c.error + "</li></ul></li>";
+                                errorcount++;
+                            }
+                        }
+                        templht = templht + "</ul></td></tr>";
+                    }
+                    if (errorcount != 0) logHTMLTemplate += templht;
+                    templht = "";
+                    
+                   
+                }
+              
+                logHTMLTemplate = logHTMLTemplate + "<tr></tr>";
+                //end loop thru errors
+                logHTMLTemplate = logHTMLTemplate + "</tbody></table>";
+            }
+
+            logHTMLTemplate = logHTMLTemplate + "<br>";
+
+            //Metadata editor *****************************************************************************************************************************
+            logHTMLTemplate = logHTMLTemplate + "<h3>Summary of Metadata Editor Batch Validation : ValidateMD.doc</h3>";
+            logHTMLTemplate = logHTMLTemplate + "<p>Manifest File: imsmanifest.xml</p>";
+            logHTMLTemplate = logHTMLTemplate + "<table border='1'>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Total Number of Metadata Files:</td><td>" + numMetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of SCO Metadata Files:</td><td>" + numSCOmetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of Content Aggregation Metadata Files:</td><td>" + numContentAgMetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of Asset Metadata Files:</td><td>" + numAssetmetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of Invalid Files:</td><td>" + numinvalidmetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of Valid Files:</td><td>" + numvalidmetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "<tr><td>Number of Missing Metadata Files:</td><td>" + nummissingmetadatafiles + "</td></tr>";
+            logHTMLTemplate = logHTMLTemplate + "</table><br>";
+
+            //Back to ADL testsuite Summary/ Launch Detail and Runtime log **********************************************************************************
+
+            if (SCOList.Count() > 0)
+            {
+                logHTMLTemplate = logHTMLTemplate + "<h3> Details of Sharable Content Object (SCO) Run-Time Environment Conformance Test  : " + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\") + 1) + "</h3><br>";
+
+                foreach(var sco in SCOList)
+                {
+                    /*
+                    XElement sld;
+                    sld = XElement.Load(sco.getLaunchfile());
+                    String thefile = "";
+                    var lfile = from te in sld.Elements("message") where te.Value.Contains("Attempting to Launch SCO:") == true select te;
+                    foreach(var t in lfile)
+                    {
+                        thefile = t.Value;
+                    }     */
+                String thefile = sco.getLaunchfile();
+                    logHTMLTemplate = logHTMLTemplate + "<h3>" + sco.getSCOname() + "</h3>";
+                    //logHTMLTemplate = logHTMLTemplate + "<p>Launch File: " + thefile.Replace("Attempting to Launch SCO:","") + " </p>";
+                    logHTMLTemplate = logHTMLTemplate + "<p>Launch File: " + thefile.Replace("Attempting to Launch SCO:", "") + " </p>";
+                    logHTMLTemplate = logHTMLTemplate + "<table border='1'>";
+                    logHTMLTemplate = logHTMLTemplate + "<tr><th class=conform>Conformant</th><th class=apicalls>API Call</th><th class=details>Detail</th><th class=errors>Errors</th><th class=warnings>Warnings</th></tr>";
+
+            
+
+                    foreach (var t in sco.getmainCGIcalls())
+                    {
+                        logHTMLTemplate = logHTMLTemplate + "<tr>";
+                        logHTMLTemplate = logHTMLTemplate + "<td class=confromance>";
+                        if (t.twritten_Count > 0) { logHTMLTemplate = logHTMLTemplate + "yes"; }
+                        else { logHTMLTemplate = logHTMLTemplate + "<font color=red>NO</font>"; }//CPCTS_conformant = false;
+                        logHTMLTemplate = logHTMLTemplate + "</td><td class=apicall>" + t.item_name + "</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td class=details>";
+                        logHTMLTemplate = logHTMLTemplate + "<ul>";
+                        logHTMLTemplate = logHTMLTemplate + "<li class=normal>Times invoked: " + t.twritten_Count + "</li>";
+                        logHTMLTemplate = logHTMLTemplate + "</ul>";
+                        logHTMLTemplate = logHTMLTemplate + "</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td><br>";
+                        if (t.error != "") logHTMLTemplate = logHTMLTemplate + t.error;
+                        logHTMLTemplate = logHTMLTemplate + "</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td class=warnings><br></td>";
+                        logHTMLTemplate = logHTMLTemplate + "</tr>";
+                    }
+
+                    foreach(var et in sco.getextraCGIcalls())
+                    {
+                        logHTMLTemplate = logHTMLTemplate + "<tr>";
+                        if (et.error != "") logHTMLTemplate = logHTMLTemplate + "<td class=conform><font color=red>NO</font></td>";
+                        else logHTMLTemplate = logHTMLTemplate + "<td class=conform>yes</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td class=apicall>" + et.item_name + "</td><td class=details>";
+                        logHTMLTemplate = logHTMLTemplate + "<ul>";
+                        logHTMLTemplate = logHTMLTemplate + "<li class=normal>Times Written: " + et.twritten_Count + "</li>";
+                        logHTMLTemplate = logHTMLTemplate + "<ul>";
+                        logHTMLTemplate = logHTMLTemplate + "<li>Last Value Written: " + et.twritten_value + "</li>";
+                        logHTMLTemplate = logHTMLTemplate + "</ul>";
+                        logHTMLTemplate = logHTMLTemplate + "<li>Times Retrieved: " + et.trecieved_Count + "</li>";
+                        logHTMLTemplate = logHTMLTemplate + "<ul>";
+                        logHTMLTemplate = logHTMLTemplate + "<li>Last Value Retrieved: " + et.trecieved_value + "</li>";
+                        logHTMLTemplate = logHTMLTemplate + "</ul>";
+                        logHTMLTemplate = logHTMLTemplate + "</ul>";
+                        logHTMLTemplate = logHTMLTemplate + "</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td><br>";
+                        if (et.error != "") logHTMLTemplate = logHTMLTemplate + et.error;
+                        logHTMLTemplate = logHTMLTemplate + "</td>";
+                        logHTMLTemplate = logHTMLTemplate + "<td class=warnings><ul><br></ul></td>";
+                        logHTMLTemplate = logHTMLTemplate + "</tr>";
+                    }
+           
+
+                    logHTMLTemplate = logHTMLTemplate + "</table>";
+                }
+
+            }
+
+            //ParsedOutput Summary header
+            String logTemplateHead = "<html xmlns=http://www.w3.org/TR/REC-html40><head><META http-equiv=Content-Type content=text/html; charset=UTF-8><title>Army Log Parser Output</title><style type=text/css>th{background-color=rgb(220,220,220);}table{width=92%;border=1;}td.conform{width=5%;}td.apicall{width=15%;}td.details{width=30%;}td.errors{width=30%;}th.conform{width=5%;}th.apicall{width=15%;}th.details{width=30%;}th.errors{width=30%;}th.warnings(width=20%;}li.error{color=red}li.normal{color=black}td.error{color=red}</style></head>";
+            String logHTMLsummaryTemplate = logTemplateHead + "<body><h1>Parsing Logs:</h1>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<ul>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Resource Validator Manifest Files Missing [ <a href=>manifest_files_missing.html</a>] : ";
+            if (intManifestFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Resource Validator Packaged Files Missing [ <a href=>packaged_files_missing.html</a>] : ";
+            if (intPIFFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Content Package Conformance Test Summary [ <a href='file://" + ADLTestSuiteSummaryfile + "'>" + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\") + 1) + "</a>] : ";
+            if (CPCTS_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Content Package Conformance Test Details [ <a href='file://" + ADLTestSuiteDetailsfile + "'>" + ADLTestSuiteDetailsfile.Substring(ADLTestSuiteDetailsfile.LastIndexOf("\\") + 1) + "</a>] : ";
+            if (CPCTD_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Sharable Content Object (SCO) Run-Time Environment Conformance Test [ <a href='file://" + ADLTestSuiteSummaryfile + "'>" + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\")+1) + "</a>] : ";
+            if (SCO_runtime_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Metadata Editor Batch Validation [ <a href=''>ValidateMD.doc</a>] : <font color=green>CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "</ul>";
+
+            logHTMLTemplate = logHTMLsummaryTemplate + logHTMLTemplate;
+
+
+            logHTMLTemplate += "</body></html>";
+
+            //return the html
+            return logHTMLTemplate;
+        }
+
+        /// <summary>
         /// Displays a specified error message in the GUI and disables the Validate button.
         /// </summary>
         /// <param name="statusMsg">The error message to display.</param>
@@ -760,7 +1202,7 @@ namespace SCORMResourceValidator
         /// </summary>
         private void displayAboutBox()
         {
-            System.Windows.Forms.MessageBox.Show("SCORM Resource Validator v2.1\n© 2018 JANUS Research Group", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            System.Windows.Forms.MessageBox.Show("SCORM Resource Validator v2.2\n© 2018 JANUS Research Group", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -942,7 +1384,7 @@ namespace SCORMResourceValidator
                 if (badlogFilelist.Count > 0 )
                 {
                     lbllogvalidate.ForeColor = Color.Crimson;
-                    lbllogvalidate.Text = "Log files missing or did not match, Please see logs above for details.";
+                    lbllogvalidate.Text = "Log files missing or did not match, Please view the logs above for details.";
                     lbllogvalidate.Visible = true;
                     warningLogsfail.Visible = true;
                     return false;
@@ -958,7 +1400,375 @@ namespace SCORMResourceValidator
 
             }
             
+            return false;
+        }
+
+        /// <summary>
+        /// Parses out the ADL test suite logs and creates a combined
+        /// log file with information from all the logs created by this program
+        /// </summary>
+        /// 
+        /// 
+        private bool parseLogs()
+        {
+            string theADLLogdir = ADLlogFolderBrowserDialog.SelectedPath;
+            XElement sl;
+            List<string> CPSLManifestErrors = new List<string>();
+            List<string> CPSLMetadataErrors = new List<string>();
+            List<string> CPSLSCOtesterrors = new List<string>();
+
+            if (theADLLogdir != "")
+            {
+                string[] ADLlogfiles = Directory.GetFiles(ADLlogFolderBrowserDialog.SelectedPath);
+                List<string> ADLlogfileslist = ADLlogfiles.ToList();
+                string thefile, summarylogfile = "", detailedlogfile = "";
+
+                //First find the two log files we need:
+                // yyyy-mm-dd_hh.mm.ssss_packagename_SummaryLog.xml
+                // yyyy-mm-dd_hh.mm.ssss_packagename_DetailedLog.xml
+                summarylogfile = ADLlogfileslist.Find(x => x.Contains("_SummaryLog.xml"));
+                if (summarylogfile != null)
+                {
+                    thefile = summarylogfile.Substring(summarylogfile.LastIndexOf('\\') + 1).Substring(23).Replace("SummaryLog", "DetailedLog");
+                    detailedlogfile = ADLlogfileslist.Find(x => x.Contains(thefile));
+                }
+                
+
+                ADLTestSuiteSummaryfile = summarylogfile;
+                ADLTestSuiteDetailsfile = detailedlogfile;
+
+                if (ADLTestSuiteSummaryfile != "" && ADLTestSuiteDetailsfile != "")
+                {
+
+                    //ADL Summary Log parse
+                    // summarylog manifest log
+
+                    //pull in Summary log
+                    sl = XElement.Load(ADLTestSuiteSummaryfile);
+                    
+                    var cList =
+                    from te in sl.Elements("message")
+                    where (string)te.Value == "Controlling Document(s) Required For XML Parsing Found at Root of the Content Package" || (te.Value.Contains("The IMS Manifest") == true && (string)te.Attribute("type").Value == "pass")
+                    select te;
+
+                    if (cList.Count() < 5)
+                    {
+                        var eList =
+                             from te in sl.Elements("message")
+                             where (te.Value.Contains("The IMS Manifest") == true && te.Attribute("type").Value == "fail")
+                             select te;
+                        foreach (string stre in eList)
+                        {
+                            CPSLManifestErrors.Add(stre.ToString());
+                        }
+                    }
+                    // summary log metadata
+                    var mList =
+                    from te in sl.Elements("message")
+                    where (te.Value.Contains("The Metadata XML") == true && (string)te.Attribute("type").Value == "pass")
+                    select te;
+                    if (mList.Count() < 2)
+                    {
+                        var m2List =
+                             from te in sl.Elements("message")
+                             where (te.Value.Contains("The Metadata XML") == true && te.Attribute("type").Value == "fail")
+                             select te;
+                        foreach (string stre in m2List)
+                        {
+                            CPSLManifestErrors.Add(stre.ToString());
+                        }
+                    }
+                   
+
+
+                    //ADL Detail Log parse 
+                    List<string> CPDLWarnErrors = new List<string>();
+                    bool CPDLWellness = false;
+                    bool CDPLValid = false;
+                    XElement sld;
+
+                    //pull in Details log
+                    sld = XElement.Load(detailedlogfile);
+                    
+                    var dmList =
+                    from te in sld.Elements("message")
+                    where (string)te.Value == "Validating the XML for Wellformedness"
+                    select te;
+                    if (dmList.Count() == 1)
+                    {
+                        CPDLWellness = true;
+                    }
+                    var dmvList =
+                   from te in sld.Elements("message")
+                   where (string)te.Value == "Validating the XML against the Controlling Documents"
+                   select te;
+                    if (dmvList.Count() == 1)
+                    {
+                        CDPLValid = true;
+                    }
+
+                    var dwmList =
+                    from te in sld.Elements("message")
+                    where te.Attribute("type").Value == "warn" || te.Attribute("type").Value == "fail"
+                    select te;
+                    if (dwmList.Count() > 0)
+                    {
+                        foreach (var h in dwmList)
+                        {
+                            CPDLWarnErrors.Add(h.Value.ToString());
+
+                        }
+                    }
+
+
+                    //ADL Luanch Detail Log parse 
+                    //This has the counts of SCOs, the interactions, and the Runtime info
+
+                   // var lfile = from te in sl.Elements("message") where te.Value.Contains("Attempting to Launch SCO:") == true select te;
+                    var lfile = from te in sld.Elements() where te.Name == "link" && (string)te.Attribute("type").Value == "SCO" select te;
+                    if (lfile.Count() > 0)
+                    {
+                       // string launchdetailedlogfile = "";
+                        int SCOcount = 1;
+                        SCOInfo tempSCOinfo;
+                        foreach (var lf in lfile)
+                        {
+                            /*   launchdetailedlogfile = lf.ToString().Replace("Attempting to Launch SCO:", "");
+                               launchdetailedlogfile = launchdetailedlogfile.Substring(launchdetailedlogfile.LastIndexOf("\\") + 1);
+                               launchdetailedlogfile = launchdetailedlogfile.Substring(0, launchdetailedlogfile.LastIndexOf("."));
+                               ADLTestSuiteLuanchDetailsfile = ADLlogfileslist.Find(x => x.Contains(launchdetailedlogfile));
+                               */
+                            ADLTestSuiteLuanchDetailsfile = ADLlogfileslist.Find(x => x.Contains(lf.Value));
+
+                            //create SCO object
+                            tempSCOinfo = new SCOInfo("SCO_"+ SCOcount.ToString(), ADLTestSuiteLuanchDetailsfile);
+
+                            // mainCGIcalls Initialize Terminate Commit GetLastError
+                            sld = XElement.Load(ADLTestSuiteLuanchDetailsfile);
+                            List<string> cgicallsMain = new List<string> { "Initialize", "Terminate", "Commit" };
+                            if (ShouldBeQuiz)
+                            {
+                                cgicallsMain.Remove("Commit");
+                                cgicallsMain.Add("GetLastError");
+                                cgicallsMain.Add("Commit");
+
+                            }
+                            String tempstr = "";
+                            LogValues tempLV;
+                            foreach (string c in cgicallsMain)
+                            {
+                                tempLV = new LogValues();
+                                if (c == "Commit") tempstr = "The " + c + "() method call finished successfully";
+                                else tempstr = "The " + c + "() method finished successfully";
+                                var tinvoked = from te in sld.Elements("message") where (string)te.Value == tempstr select te;
+                                tempLV.item_name = c;
+                                tempLV.twritten_Count = tinvoked.Count();
+                                if (tinvoked.Count() < 1)
+                                {
+                                    SCO_runtime_conformant = false;
+                                    tempLV.error = "Army Mandatory error: " + c + " is not invoked minimum number of times (1)";
+                                }
+                                else tempLV.error = "";
+                                // mainCGIcalls.Add(tempLV);
+                                tempSCOinfo.AddtomainCGIList(tempLV);
+                            }
+
+                            //extraCGIcalls
+                            //cmi.interactions.n.result cmi.interactions.n.type cmi.interactions.n.learner_response cmi.interactions.n.correct_responses.n.pattern cmi.session_time cmi.location cmi.completion_status cmi.success_status cmi.exit
+
+                            List<string> cgicallstemp = new List<string> { "cmi.exit", "cmi.success_status", "cmi.completion_status", "cmi.location", "cmi.session_time" };
+                            if (ShouldBeQuiz) { cgicallstemp.Remove("cmi.location"); cgicallstemp.Remove("cmi.session_time"); cgicallstemp.Add("cmi.score.scaled"); cgicallstemp.Add("cmi.session_time"); }
+                            foreach (string c in cgicallstemp)
+                            {
+                                tempLV = GetAPICallLogValues(c, 0, 1);
+                                //extraCGIcalls.Add(tempLV);
+                                tempSCOinfo.AddtoextraCGIList(tempLV);
+                                if (tempLV.error != "") { SCO_runtime_conformant = false; }
+                            }
+
+                            if (ShouldBeQuiz)
+                            {
+                                cgicallstemp = new List<string> { "cmi.interactions.n.correct_responses.n.pattern", "cmi.interactions.n.learner_response", "cmi.interactions.n.type", "cmi.interactions.n.result" };
+                                foreach (string c in cgicallstemp)
+                                {
+                                    tempLV = GetAPICallLogValues(c, "cmi.interactions", c.Substring(c.LastIndexOf('.') + 1), 0, 1);
+                                    //extraCGIcalls.Add(tempLV);
+                                    tempSCOinfo.AddtoextraCGIList(tempLV);
+                                    if (tempLV.error != "") { SCO_runtime_conformant = false; }
+                                }
+
+                            }
+                            SCOList.Add(tempSCOinfo);
+                            SCOcount++;
+                        }//end for each loop
+
+                        //Now get SCO data (errors) from Summary log
+                        var fl = from te in sl.Elements() where te.Name == "message" || te.Name == "link" select te;
+                        List<string> temperrors = new List<string>();
+
+                        foreach (XElement x in fl)
+                        {
+                            if (x.Name == "message" && x.Attribute("type").Value == "fail")
+                            {
+                                temperrors.Add(x.Value);
+                            }
+                            if (x.Name == "link" && x.Attribute("type").Value == "SCO")
+                            {
+                                //Add to scolist if errors
+                                if (temperrors.Count() > 0)
+                                {
+                                    foreach(var s in SCOList)
+                                    {
+                                        if (s.match(x.Value))
+                                        {
+                                            s.setSummaryLogErrors(temperrors);
+                                            SCO_conformant = false;
+                                            temperrors.Clear();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (x.Name == "link" && x.Attribute("type").Value != "SCO")
+                            {
+                                temperrors.Clear();
+                            }
+                        }
+                        temperrors.Clear();
+                    }
+                    else { SCO_runtime_conformant = false; }
+
+                    //do logging
+                    // Generate logs parsed log (ParsedOutput.html)
+                    
+                    if (lfile.Count() < 1)
+                    {
+                        lblTSlogvalidate.ForeColor = Color.Crimson;
+                        lblTSlogvalidate.Text = "ADL Test Suite Log files missing or inaccessable, Please view the logs above for details. ";
+                        lblTSlogvalidate.Visible = true;
+                        warningtestsuitelogfail.Visible = true;
+                        displayErrorMsg("Log files not found", "INCORRECT FOLDER OR FILES: The ADL Testsuite log folder is missing critical files. It is liekly that the wrong folder was selected for parsing.");
+
+                    }
+                    else
+                    {
+                        lblTSlogvalidate.ForeColor = Color.OliveDrab;
+                        lblTSlogvalidate.Text = "The log files selected were parsed and correct.";
+                        lblTSlogvalidate.Visible = true;
+
+                    }
+                    string logHTMLTemplate = createLogParserHTMLTemplate(CPSLManifestErrors, CPSLMetadataErrors, CPSLSCOtesterrors, CPDLWarnErrors, CPDLWellness, CDPLValid);
+                    System.IO.Directory.CreateDirectory(strLogDir);
+                    System.IO.File.WriteAllText(strLogDir + @"\ParsedOutput.html", logHTMLTemplate);
+
+                } //end check file if
+                else
+                {
+                    lblTSlogvalidate.ForeColor = Color.Crimson;
+                    lblTSlogvalidate.Text = "ADL Test Suite Log files missing or inaccessable, no log file was created.";
+                    lblTSlogvalidate.Visible = true;
+                    warningtestsuitelogfail.Visible = true;
+                    displayErrorMsg("Log files not found", "The ADL Testsuite Log file(s) were not found or inaccessable in the specified dierctory folder.");
+                    return false;
+                }
+            }
+            
             return true;
+        }
+
+        /// <summary>
+        /// Gets values for specified entries from the Luanch Details file
+        /// </summary>
+        /// <param name="apicall">Which API Call that needs it's data from the log file</param>
+        /// <param name="minget">The minimum times it should be retrieved from the LMS</param>
+        /// <param name="minset">The minimum times it should be set in the LMS</param>
+        private LogValues GetAPICallLogValues(string apicall, int minget, int minset)
+        {
+            LogValues l = new LogValues();
+            XElement sld;
+            
+            int sindex = 0;
+            int eindex = 0;
+            l.item_name = apicall;
+            l.twritten_Count = 0;
+            l.trecieved_Count = 0;
+            l.twritten_value = "";
+            l.trecieved_value = "";
+            l.error = "";
+
+            sld = XElement.Load(ADLTestSuiteLuanchDetailsfile);
+
+            foreach (var et in sld.Elements("message").Where(x => x.Value.Contains("SetValue") == true && x.Value.Contains(apicall) == true))
+            {
+                l.twritten_Count++;
+                l.twritten_value = et.Value.ToString();
+            }
+
+            sindex = l.twritten_value.IndexOf(',') + 2;
+            eindex = l.twritten_value.LastIndexOf('"');
+            int length = eindex - sindex;
+            if (length > 0) l.twritten_value = l.twritten_value.Substring(sindex, length);
+            if (minset > 0 && l.twritten_Count < minset) { l.error = "Army Mandatory error: " + l.item_name + " is not set the minimum number of times (" + minset.ToString() + ")"; }
+
+            foreach (var et in sld.Elements("message").Where(x => x.Value.Contains("GetValue") == true && x.Value.Contains(apicall) == true))
+            {
+                l.trecieved_Count++;
+                l.trecieved_value = et.NextNode.ToString();
+            }
+            l.trecieved_value = l.trecieved_value.Replace("The value returned from the GetValue() method call: [", "");
+            l.trecieved_value = l.trecieved_value.Replace("]", "");
+            if (minget > 0 && l.twritten_Count < minget) { l.error = "Army Mandatory error: " + l.item_name + " is not retrieved the minimum number of times (" + minget.ToString() + ")"; }
+
+            return l;
+        }
+
+        /// <summary>
+        /// Gets values for specified entries from the Luanch Details file
+        /// </summary>
+        /// <param name="apiname">Display name of the API call</param>
+        /// <param name="apicall">Which API Call that needs it's data from the log file</param>
+        /// <param name="interactiontype">Which type of cmi.interactions is being called</param>
+        /// <param name="minget">The minimum times it should be retrieved from the LMS</param>
+        /// <param name="minset">The minimum times it should be set in the LMS</param>
+        private LogValues GetAPICallLogValues(string apiname,string apicall, string interactiontype, int minget, int minset)
+        {
+            LogValues l = new LogValues();
+            XElement sld;
+
+            int sindex = 0;
+            int eindex = 0;
+            l.item_name = apiname;
+            l.twritten_Count = 0;
+            l.trecieved_Count = 0;
+            l.twritten_value = "";
+            l.trecieved_value = "";
+            l.error = "";
+
+            sld = XElement.Load(ADLTestSuiteLuanchDetailsfile);
+
+            foreach (var et in sld.Elements("message").Where(x => x.Value.Contains("SetValue") == true && (x.Value.Contains(apicall) == true && x.Value.Contains("." + interactiontype) == true)))
+            {
+                l.twritten_Count++;
+                l.twritten_value = et.Value.ToString();
+            }
+
+            sindex = l.twritten_value.IndexOf(',') + 2;
+            eindex = l.twritten_value.LastIndexOf('"');
+            int length = eindex - sindex;
+            l.twritten_value = l.twritten_value.Substring(sindex, length);
+            if(minset > 0 && l.twritten_Count < minset) { l.error = "Army Mandatory error: " + l.item_name + " is not set the minimum number of times (" + minset.ToString() + ")"; }
+
+            foreach (var et in sld.Elements("message").Where(x => x.Value.Contains("GetValue") == true && (x.Value.Contains(apicall) == true && x.Value.Contains(interactiontype) == true)))
+            {
+                l.trecieved_Count++;
+                l.trecieved_value = et.NextNode.ToString();
+            }
+            l.trecieved_value = l.trecieved_value.Replace("The value returned from the GetValue() method call: [", "");
+            l.trecieved_value = l.trecieved_value.Replace("]", "");
+            if (minget > 0 && l.twritten_Count < minget) { l.error = "Army Mandatory error: " + l.item_name + " is not retrieved the minimum number of times (" + minget.ToString() + ")"; }
+
+            return l;
+
         }
 
         /// <summary>
@@ -966,15 +1776,15 @@ namespace SCORMResourceValidator
         /// </summary>
         /// <param name="input">path and file name of the file to create a hash for</param>
         protected string GetMD5HashFromFile(string filename)
+    {
+        using (var md5 = MD5.Create())
         {
-            using (var md5 = MD5.Create())
+            using (var stream = File.OpenRead(filename))
             {
-                using (var stream = File.OpenRead(filename))
-                {
-                    return Encoding.Default.GetString(md5.ComputeHash(stream));
-                }
+                return Encoding.Default.GetString(md5.ComputeHash(stream));
             }
         }
+    }
 
         /// <summary>
         /// Does validation and sets the counts for the metadata files
@@ -1011,6 +1821,37 @@ namespace SCORMResourceValidator
                 }
                 
             }
+        }
+
+        private void ValidateMetadatafile(string metadatafilename, ZipArchive ziparchive, string themetadatatype)
+        {
+            XmlDocument tempmd = new XmlDocument();
+            ZipArchiveEntry tempzipentry;
+
+            
+                string thename = metadatafilename;
+                tempzipentry = ziparchive.GetEntry(thename);
+                if (tempzipentry is null)
+                {
+                    nummissingmetadatafiles++;
+                    metadataFilesMissing.Add(thename);
+                }
+                else
+                {
+                    tempmd.Load(ziparchive.GetEntry(thename).Open());
+                    MetadataFile themetadatafile = new MetadataFile(tempmd, thename, themetadatatype);
+                    if (!themetadatafile.isValid())
+                    {
+                        metadatafilesErrors.AddRange(themetadatafile.getErrors());
+                        numinvalidmetadatafiles++;
+                    }
+                    else
+                    {
+                        numvalidmetadatafiles++;
+                    }
+                }
+
+            
         }
 
 

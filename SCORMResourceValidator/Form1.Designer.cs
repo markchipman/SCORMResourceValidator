@@ -59,9 +59,16 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.lblLogFileDir = new System.Windows.Forms.Label();
             this.btnSelectLogDir = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
+            this.lblPrevLogs = new System.Windows.Forms.Label();
             this.lbllogvalidate = new System.Windows.Forms.Label();
             this.warningLogsfail = new System.Windows.Forms.PictureBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.lblADLlogFileDir = new System.Windows.Forms.Label();
+            this.btnSelectADLLogDir = new System.Windows.Forms.Button();
+            this.lblADLTestSuitelogs = new System.Windows.Forms.Label();
+            this.ADLlogFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.warningtestsuitelogfail = new System.Windows.Forms.PictureBox();
+            this.lblTSlogvalidate = new System.Windows.Forms.Label();
             this.grpPIFFilesFound.SuspendLayout();
             this.grpManifestFilesFound.SuspendLayout();
             this.grpPIFFilesMissing.SuspendLayout();
@@ -72,6 +79,8 @@
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.warningLogsfail)).BeginInit();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.warningtestsuitelogfail)).BeginInit();
             this.SuspendLayout();
             // 
             // lblStatus
@@ -80,7 +89,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblStatus.BackColor = System.Drawing.SystemColors.Control;
             this.lblStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblStatus.Location = new System.Drawing.Point(13, 169);
+            this.lblStatus.Location = new System.Drawing.Point(13, 140);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lblStatus.Size = new System.Drawing.Size(917, 25);
@@ -93,7 +102,7 @@
             // 
             this.lblUserPrompt.AutoSize = true;
             this.lblUserPrompt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUserPrompt.Location = new System.Drawing.Point(15, 47);
+            this.lblUserPrompt.Location = new System.Drawing.Point(15, 35);
             this.lblUserPrompt.Name = "lblUserPrompt";
             this.lblUserPrompt.Size = new System.Drawing.Size(548, 20);
             this.lblUserPrompt.TabIndex = 4;
@@ -105,11 +114,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpPIFFilesFound.Controls.Add(this.listPIFFilesFound);
             this.grpPIFFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpPIFFilesFound.Location = new System.Drawing.Point(13, 208);
+            this.grpPIFFilesFound.Location = new System.Drawing.Point(13, 172);
             this.grpPIFFilesFound.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpPIFFilesFound.Name = "grpPIFFilesFound";
             this.grpPIFFilesFound.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grpPIFFilesFound.Size = new System.Drawing.Size(917, 111);
+            this.grpPIFFilesFound.Size = new System.Drawing.Size(917, 96);
             this.grpPIFFilesFound.TabIndex = 6;
             this.grpPIFFilesFound.TabStop = false;
             this.grpPIFFilesFound.Text = "Files found in PIF";
@@ -135,11 +144,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.grpManifestFilesFound.Controls.Add(this.listManifestFilesFound);
             this.grpManifestFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpManifestFilesFound.Location = new System.Drawing.Point(13, 325);
+            this.grpManifestFilesFound.Location = new System.Drawing.Point(13, 276);
             this.grpManifestFilesFound.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpManifestFilesFound.Name = "grpManifestFilesFound";
             this.grpManifestFilesFound.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grpManifestFilesFound.Size = new System.Drawing.Size(917, 111);
+            this.grpManifestFilesFound.Size = new System.Drawing.Size(917, 99);
             this.grpManifestFilesFound.TabIndex = 7;
             this.grpManifestFilesFound.TabStop = false;
             this.grpManifestFilesFound.Text = "Resources found in Manifest";
@@ -167,11 +176,11 @@
             this.grpPIFFilesMissing.Controls.Add(this.warningPiffmissing);
             this.grpPIFFilesMissing.Controls.Add(this.listPIFFilesMissing);
             this.grpPIFFilesMissing.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.grpPIFFilesMissing.Location = new System.Drawing.Point(13, 441);
+            this.grpPIFFilesMissing.Location = new System.Drawing.Point(13, 385);
             this.grpPIFFilesMissing.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpPIFFilesMissing.Name = "grpPIFFilesMissing";
             this.grpPIFFilesMissing.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grpPIFFilesMissing.Size = new System.Drawing.Size(917, 111);
+            this.grpPIFFilesMissing.Size = new System.Drawing.Size(917, 97);
             this.grpPIFFilesMissing.TabIndex = 8;
             this.grpPIFFilesMissing.TabStop = false;
             this.grpPIFFilesMissing.Text = "Files found in Manifest and not found in PIF";
@@ -210,11 +219,11 @@
             this.grpManifestFilesMissing.Controls.Add(this.warningMFMising);
             this.grpManifestFilesMissing.Controls.Add(this.listManifestFilesMissing);
             this.grpManifestFilesMissing.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpManifestFilesMissing.Location = new System.Drawing.Point(13, 557);
+            this.grpManifestFilesMissing.Location = new System.Drawing.Point(13, 493);
             this.grpManifestFilesMissing.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.grpManifestFilesMissing.Name = "grpManifestFilesMissing";
             this.grpManifestFilesMissing.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.grpManifestFilesMissing.Size = new System.Drawing.Size(917, 111);
+            this.grpManifestFilesMissing.Size = new System.Drawing.Size(917, 103);
             this.grpManifestFilesMissing.TabIndex = 8;
             this.grpManifestFilesMissing.TabStop = false;
             this.grpManifestFilesMissing.Text = "Files found in PIF and not listed in Manifest";
@@ -305,7 +314,7 @@
             this.btnValidate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnValidate.Enabled = false;
             this.btnValidate.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnValidate.Location = new System.Drawing.Point(770, 84);
+            this.btnValidate.Location = new System.Drawing.Point(770, 59);
             this.btnValidate.Margin = new System.Windows.Forms.Padding(4);
             this.btnValidate.Name = "btnValidate";
             this.btnValidate.Size = new System.Drawing.Size(160, 44);
@@ -342,7 +351,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.SelectPIF);
             this.groupBox1.Controls.Add(this.lblPIFFilename);
-            this.groupBox1.Location = new System.Drawing.Point(13, 80);
+            this.groupBox1.Location = new System.Drawing.Point(13, 55);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
@@ -357,7 +366,7 @@
             this.linkViewLogs.AutoSize = true;
             this.linkViewLogs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(255)))), ((int)(((byte)(200)))));
             this.linkViewLogs.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.linkViewLogs.Location = new System.Drawing.Point(813, 170);
+            this.linkViewLogs.Location = new System.Drawing.Point(813, 141);
             this.linkViewLogs.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkViewLogs.Name = "linkViewLogs";
             this.linkViewLogs.Size = new System.Drawing.Size(119, 20);
@@ -373,7 +382,7 @@
             // 
             this.goldbarpnl.BackColor = System.Drawing.Color.Goldenrod;
             this.goldbarpnl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.goldbarpnl.Location = new System.Drawing.Point(-4, 136);
+            this.goldbarpnl.Location = new System.Drawing.Point(-4, 111);
             this.goldbarpnl.Name = "goldbarpnl";
             this.goldbarpnl.Size = new System.Drawing.Size(958, 15);
             this.goldbarpnl.TabIndex = 14;
@@ -382,7 +391,7 @@
             // 
             this.goldbarpnlbottom.BackColor = System.Drawing.Color.Goldenrod;
             this.goldbarpnlbottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.goldbarpnlbottom.Location = new System.Drawing.Point(0, 680);
+            this.goldbarpnlbottom.Location = new System.Drawing.Point(0, 607);
             this.goldbarpnlbottom.Name = "goldbarpnlbottom";
             this.goldbarpnlbottom.Size = new System.Drawing.Size(958, 15);
             this.goldbarpnlbottom.TabIndex = 15;
@@ -395,7 +404,7 @@
             // 
             this.groupBox2.Controls.Add(this.lblLogFileDir);
             this.groupBox2.Controls.Add(this.btnSelectLogDir);
-            this.groupBox2.Location = new System.Drawing.Point(13, 708);
+            this.groupBox2.Location = new System.Drawing.Point(13, 641);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(746, 52);
             this.groupBox2.TabIndex = 16;
@@ -423,21 +432,21 @@
             this.btnSelectLogDir.UseVisualStyleBackColor = true;
             this.btnSelectLogDir.Click += new System.EventHandler(this.btnSelectLogDir_Click);
             // 
-            // label2
+            // lblPrevLogs
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(13, 698);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(477, 18);
-            this.label2.TabIndex = 17;
-            this.label2.Text = "Optional: Select directory to validate previously made log files.";
+            this.lblPrevLogs.AutoSize = true;
+            this.lblPrevLogs.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPrevLogs.Location = new System.Drawing.Point(13, 629);
+            this.lblPrevLogs.Name = "lblPrevLogs";
+            this.lblPrevLogs.Size = new System.Drawing.Size(477, 18);
+            this.lblPrevLogs.TabIndex = 17;
+            this.lblPrevLogs.Text = "Optional: Select directory to validate previously made log files.";
             // 
             // lbllogvalidate
             // 
             this.lbllogvalidate.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbllogvalidate.ForeColor = System.Drawing.Color.OliveDrab;
-            this.lbllogvalidate.Location = new System.Drawing.Point(794, 698);
+            this.lbllogvalidate.Location = new System.Drawing.Point(794, 630);
             this.lbllogvalidate.Name = "lbllogvalidate";
             this.lbllogvalidate.Size = new System.Drawing.Size(138, 68);
             this.lbllogvalidate.TabIndex = 18;
@@ -448,22 +457,89 @@
             // warningLogsfail
             // 
             this.warningLogsfail.Image = global::SCORMResourceValidator.Properties.Resources.alert_triangle_redyellow_icon;
-            this.warningLogsfail.Location = new System.Drawing.Point(770, 700);
+            this.warningLogsfail.Location = new System.Drawing.Point(770, 633);
             this.warningLogsfail.Name = "warningLogsfail";
             this.warningLogsfail.Size = new System.Drawing.Size(23, 21);
             this.warningLogsfail.TabIndex = 3;
             this.warningLogsfail.TabStop = false;
             this.warningLogsfail.Visible = false;
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.lblADLlogFileDir);
+            this.groupBox3.Controls.Add(this.btnSelectADLLogDir);
+            this.groupBox3.Location = new System.Drawing.Point(16, 709);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(746, 52);
+            this.groupBox3.TabIndex = 17;
+            this.groupBox3.TabStop = false;
+            // 
+            // lblADLlogFileDir
+            // 
+            this.lblADLlogFileDir.AutoSize = true;
+            this.lblADLlogFileDir.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblADLlogFileDir.Location = new System.Drawing.Point(111, 20);
+            this.lblADLlogFileDir.Name = "lblADLlogFileDir";
+            this.lblADLlogFileDir.Size = new System.Drawing.Size(144, 17);
+            this.lblADLlogFileDir.TabIndex = 1;
+            this.lblADLlogFileDir.Text = "No Directory selected";
+            // 
+            // btnSelectADLLogDir
+            // 
+            this.btnSelectADLLogDir.Enabled = false;
+            this.btnSelectADLLogDir.Location = new System.Drawing.Point(6, 14);
+            this.btnSelectADLLogDir.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnSelectADLLogDir.Name = "btnSelectADLLogDir";
+            this.btnSelectADLLogDir.Size = new System.Drawing.Size(101, 26);
+            this.btnSelectADLLogDir.TabIndex = 0;
+            this.btnSelectADLLogDir.Text = "Browse";
+            this.btnSelectADLLogDir.UseVisualStyleBackColor = true;
+            this.btnSelectADLLogDir.Click += new System.EventHandler(this.btnSelectADLLogDir_Click);
+            // 
+            // lblADLTestSuitelogs
+            // 
+            this.lblADLTestSuitelogs.AutoSize = true;
+            this.lblADLTestSuitelogs.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblADLTestSuitelogs.Location = new System.Drawing.Point(14, 697);
+            this.lblADLTestSuitelogs.Name = "lblADLTestSuitelogs";
+            this.lblADLTestSuitelogs.Size = new System.Drawing.Size(452, 18);
+            this.lblADLTestSuitelogs.TabIndex = 19;
+            this.lblADLTestSuitelogs.Text = "Optional: Select directory to parse ADL Test Suite log files.";
+            // 
+            // warningtestsuitelogfail
+            // 
+            this.warningtestsuitelogfail.Image = global::SCORMResourceValidator.Properties.Resources.alert_triangle_redyellow_icon;
+            this.warningtestsuitelogfail.Location = new System.Drawing.Point(770, 702);
+            this.warningtestsuitelogfail.Name = "warningtestsuitelogfail";
+            this.warningtestsuitelogfail.Size = new System.Drawing.Size(23, 21);
+            this.warningtestsuitelogfail.TabIndex = 20;
+            this.warningtestsuitelogfail.TabStop = false;
+            this.warningtestsuitelogfail.Visible = false;
+            // 
+            // lblTSlogvalidate
+            // 
+            this.lblTSlogvalidate.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTSlogvalidate.ForeColor = System.Drawing.Color.OliveDrab;
+            this.lblTSlogvalidate.Location = new System.Drawing.Point(799, 702);
+            this.lblTSlogvalidate.Name = "lblTSlogvalidate";
+            this.lblTSlogvalidate.Size = new System.Drawing.Size(138, 68);
+            this.lblTSlogvalidate.TabIndex = 21;
+            this.lblTSlogvalidate.Text = "The log files selected were validated and correct.";
+            this.lblTSlogvalidate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblTSlogvalidate.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(946, 768);
+            this.ClientSize = new System.Drawing.Size(946, 771);
+            this.Controls.Add(this.lblTSlogvalidate);
+            this.Controls.Add(this.warningtestsuitelogfail);
+            this.Controls.Add(this.lblADLTestSuitelogs);
             this.Controls.Add(this.warningLogsfail);
             this.Controls.Add(this.lbllogvalidate);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.lblPrevLogs);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.goldbarpnlbottom);
             this.Controls.Add(this.goldbarpnl);
@@ -477,6 +553,7 @@
             this.Controls.Add(this.lblUserPrompt);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.groupBox3);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
@@ -497,6 +574,9 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.warningLogsfail)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.warningtestsuitelogfail)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -532,11 +612,18 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label lblLogFileDir;
         private System.Windows.Forms.Button btnSelectLogDir;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblPrevLogs;
         private System.Windows.Forms.PictureBox warningMFMising;
         private System.Windows.Forms.PictureBox warningPiffmissing;
         private System.Windows.Forms.Label lbllogvalidate;
         private System.Windows.Forms.PictureBox warningLogsfail;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Label lblADLlogFileDir;
+        private System.Windows.Forms.Button btnSelectADLLogDir;
+        private System.Windows.Forms.Label lblADLTestSuitelogs;
+        private System.Windows.Forms.FolderBrowserDialog ADLlogFolderBrowserDialog;
+        private System.Windows.Forms.PictureBox warningtestsuitelogfail;
+        private System.Windows.Forms.Label lblTSlogvalidate;
     }
 }
 
