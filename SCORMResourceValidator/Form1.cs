@@ -52,6 +52,7 @@ namespace SCORMResourceValidator
         private bool CPCTD_conformant = true;//Content Package Conformance Test Details
         private bool SCO_runtime_conformant = true;//Sharable Content Object (SCO) Run-Time Environment Conformance Test
         private bool SCO_conformant = true;//have to have two of these because the previous one comes from the launch detail file  and the other from the summary file
+        private bool Metadatafile_conformant = true;//Metadata validate Conformance
         public struct LogValues
         {
             public string item_name;
@@ -247,6 +248,7 @@ namespace SCORMResourceValidator
             CPCTD_conformant = true;
             SCO_runtime_conformant = true;
             SCO_conformant = true;
+            Metadatafile_conformant = true;
             SCOList.Clear();
             mainCGIcalls.Clear();
             extraCGIcalls.Clear();
@@ -625,9 +627,15 @@ namespace SCORMResourceValidator
             //System.IO.File.WriteAllText(strLogDir + @"\metadata_file_report.doc", logHTMLTemplate);
 
             //Generate checksum
+            try
+            {
             string sdf = "";
             sdf = GetMD5HashFromFile(openFileDialog1.FileName);
             System.IO.File.WriteAllText(strLogDir + @"\PIF_file_validate.txt", sdf);
+
+            }
+            catch
+            { }
 
 
 
@@ -821,33 +829,31 @@ namespace SCORMResourceValidator
 
             //Manifest files missing *****************************************************************************************************************************
             logHTMLTemplate = logHTMLTemplate + "<h3> Summary of Resource Validator Manifest Files Missing : manifest_files_missing.html</h3>";
-            if (intManifestFilesMissingCount == 0)
+            if (intPIFFilesMissingCount == 0)
             logHTMLTemplate = logHTMLTemplate + "<h2>This log is conformant</h2><br>";
             else
             {
                 //  logHTMLTemplate = logHTMLTemplate + "There are " + intManifestFilesMissingCount.ToString() + " missing.";
                 logHTMLTemplate = logHTMLTemplate + "<table border='1'><tr><th>Files Listed in Manifest that are not in the package</th></tr>";
-                logHTMLTemplate = logHTMLTemplate + "<tr><td>";
-                foreach (string file in listManifestFilesMissing.Items)
+                foreach (string file in listPIFFilesMissing.Items)
                 {
-                    logHTMLTemplate = logHTMLTemplate + file.Replace(" / ", @"\") + "<br>";
+                    logHTMLTemplate = logHTMLTemplate + "<tr><td>" + file.Replace(" / ", @"\") + "</td></tr>";
                 }
-                logHTMLTemplate = logHTMLTemplate + "</td></tr></table>";
+                logHTMLTemplate = logHTMLTemplate + "</table>";
             }
 
             //Package files missing *****************************************************************************************************************************
             logHTMLTemplate = logHTMLTemplate + "<h3>Summary of Resource Validator Packaged Files Missing : packaged_files_missing.html</h3>";
-            if (intPIFFilesMissingCount == 0)
+            if (intManifestFilesMissingCount== 0)
                 logHTMLTemplate = logHTMLTemplate + "<h3>There are no extra files</h3>";
             else
             {
                 logHTMLTemplate = logHTMLTemplate + "<table border='1'><tr><th>Files present in the package, but not listed on the Manifest</th></tr>";
-                logHTMLTemplate = logHTMLTemplate + "<tr><td>";
-                foreach (string file in listPIFFilesMissing.Items)
+                foreach (string file in listManifestFilesMissing.Items)
                 {
-                    logHTMLTemplate = logHTMLTemplate + file.Replace(" / ", @"\") + "<br>";
+                    logHTMLTemplate = logHTMLTemplate + "<tr><td>" + file.Replace(" / ", @"\") + "</td></tr>";
                 }
-                logHTMLTemplate = logHTMLTemplate + "</td></tr></table>";
+                logHTMLTemplate = logHTMLTemplate + "</table>";
             }
             logHTMLTemplate = logHTMLTemplate + "<p>";
             logHTMLTemplate = logHTMLTemplate + "<em>Total files contained in this package: " + intPIFFilesFoundCount.ToString() +  "</em>";
@@ -1112,10 +1118,10 @@ namespace SCORMResourceValidator
             String logHTMLsummaryTemplate = logTemplateHead + "<body><h1>Parsing Logs:</h1>";
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<ul>";
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Resource Validator Manifest Files Missing [ <a href=>manifest_files_missing.html</a>] : ";
-            if (intManifestFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            if (intPIFFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
             else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Resource Validator Packaged Files Missing [ <a href=>packaged_files_missing.html</a>] : ";
-            if (intPIFFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            if (intManifestFilesMissingCount == 0) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
             else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Content Package Conformance Test Summary [ <a href='file://" + ADLTestSuiteSummaryfile + "'>" + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\") + 1) + "</a>] : ";
             if (CPCTS_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
@@ -1126,7 +1132,9 @@ namespace SCORMResourceValidator
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Sharable Content Object (SCO) Run-Time Environment Conformance Test [ <a href='file://" + ADLTestSuiteSummaryfile + "'>" + ADLTestSuiteSummaryfile.Substring(ADLTestSuiteSummaryfile.LastIndexOf("\\")+1) + "</a>] : ";
             if (SCO_runtime_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
             else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
-            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Metadata Editor Batch Validation [ <a href=''>ValidateMD.doc</a>] : <font color=green>CONFORMANT</font></li>";
+            logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<li>Metadata Editor Batch Validation [ <a href=''>ValidateMD.doc</a>] : ";
+            if (Metadatafile_conformant) logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=green>CONFORMANT</font></li>";
+            else logHTMLsummaryTemplate = logHTMLsummaryTemplate + "<font color=red>NON-CONFORMANT</font></li>";
             logHTMLsummaryTemplate = logHTMLsummaryTemplate + "</ul>";
 
             logHTMLTemplate = logHTMLsummaryTemplate + logHTMLTemplate;
@@ -1558,7 +1566,7 @@ namespace SCORMResourceValidator
                             foreach (string c in cgicallsMain)
                             {
                                 tempLV = new LogValues();
-                                if (c == "Commit") tempstr = "The " + c + "() method call finished successfully";
+                                if (c == "Commit" || c == "GetLastError") tempstr = "The " + c + "() method call finished successfully";
                                 else tempstr = "The " + c + "() method finished successfully";
                                 var tinvoked = from te in sld.Elements("message") where (string)te.Value == tempstr select te;
                                 tempLV.item_name = c;
@@ -1777,14 +1785,18 @@ namespace SCORMResourceValidator
         /// <param name="input">path and file name of the file to create a hash for</param>
         protected string GetMD5HashFromFile(string filename)
     {
-        using (var md5 = MD5.Create())
-        {
-            using (var stream = File.OpenRead(filename))
+            try
             {
-                return Encoding.Default.GetString(md5.ComputeHash(stream));
+                using (var md5 = MD5.Create())
+                {
+                    using (var stream = File.OpenRead(filename))
+                    {
+                        return Encoding.Default.GetString(md5.ComputeHash(stream));
+                    }
+                }
             }
+            catch { return "Error: unable to create Hash"; }
         }
-    }
 
         /// <summary>
         /// Does validation and sets the counts for the metadata files
@@ -1835,6 +1847,7 @@ namespace SCORMResourceValidator
                 {
                     nummissingmetadatafiles++;
                     metadataFilesMissing.Add(thename);
+                    Metadatafile_conformant = false;
                 }
                 else
                 {
@@ -1844,6 +1857,7 @@ namespace SCORMResourceValidator
                     {
                         metadatafilesErrors.AddRange(themetadatafile.getErrors());
                         numinvalidmetadatafiles++;
+                        Metadatafile_conformant = false;
                     }
                     else
                     {
